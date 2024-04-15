@@ -34,9 +34,9 @@ Docker-compose up
 
 This command will create docker containers, clone twilight repo's in those containers, build and run the system.
 
-> When the docker starts the chain. it will go into initial block download (IBD) phase. this means that your node has joined the chain and is catching up. we cannot run btc-oracle until the chain has caught up.
-> When the chain starts. your twilight address will be displayed. please ensure that this address has nyks tokens in it.
-> Once the IBD is done. go t0 ./scripts/nyks_entrypoint.sh file and uncomment line 10. then simply rerun the container using the commands 
+1. When the docker starts the chain. it will go into initial block download (IBD) phase. this means that your node has joined the chain and is catching up. we cannot run btc-oracle until the chain has caught up.
+2. When the chain starts. your twilight address will be displayed. please ensure that this address has nyks tokens in it.
+3. Once the IBD is done. go t0 ./scripts/nyks_entrypoint.sh file and uncomment line 10. then simply rerun the container using the commands 
 ```bash
 docker-compose down
 docker-compose up
@@ -49,4 +49,4 @@ docker-compose up
 As of now the docker container builds and joins to an existing chain. if you want to star a standalone node or a new chain, then docker file needs to be changed. this information is mentioned as comments in the ./nyks/dockerfile. 
 
 #### Btc Oracle
-> As of now Btc oracle starts with a new wallet. if you have a an old one you want to use please use the --mnemonic flag, followed by the 12 word mnemonic. Example is mentioned in ./scripts/nyks_entrypoint.sh
+As of now Btc oracle starts with a new wallet. if you have a an old one you want to use please use the --mnemonic flag, followed by the 12 word mnemonic. Example is mentioned in ./scripts/nyks_entrypoint.sh
