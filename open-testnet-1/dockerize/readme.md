@@ -56,3 +56,8 @@ As of now the docker container builds and joins to an existing chain. If you wan
 
 #### BTC Oracle
 As of now BTC oracle starts with a new wallet. If you have a an old one, please use the --mnemonic flag, followed by the 12 word mnemonic. An example is mentioned in ./scripts/nyks_entrypoint.sh
+
+#### Storage
+The Docker compose used the following directories for persistent storage. If you want to remove all the data, delete the following
+1. /nyks/data/
+2. /psql/data/
