@@ -31,9 +31,15 @@ To run Twilight, follow these steps:
 ```bash
 docker-compose up
 ```
-
 This command will create docker containers, clone twilight repos in those containers, build and run the system.
 
+#### Processor Architecture
+The name of the nyks release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 45 in the `/nyks/Dockerfile` accordingly:
+1. For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
+2. For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
+3. For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
+
+#### Key Points to Consider
 1. When the docker starts the chain. it will go into initial block download (IBD) phase. This means that your node has joined the chain and is catching up. We cannot run btc-oracle until the chain has caught up.
 2. When the chain starts, your twilight address will be displayed. Please ensure that this address has nyks tokens in it.
 3. Once the IBD is done, go to ./scripts/nyks_entrypoint.sh file and uncomment line 10. Then simply rerun the container using the commands 
@@ -50,9 +56,3 @@ As of now the docker container builds and joins to an existing chain. If you wan
 
 #### BTC Oracle
 As of now BTC oracle starts with a new wallet. If you have a an old one, please use the --mnemonic flag, followed by the 12 word mnemonic. An example is mentioned in ./scripts/nyks_entrypoint.sh
-
-#### Processor Architecture
-The name of the executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 45 in the `/nyks/Dockerfile` accordingly:
-1. For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
-2. For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
-3. For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
