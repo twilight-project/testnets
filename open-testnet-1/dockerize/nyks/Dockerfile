@@ -5,8 +5,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     wget \
     vim \
-    telnet \
-    lsof
+    telnet
 
 RUN apt update && \
     apt-get install -y \
@@ -45,11 +44,8 @@ RUN ls -a
 RUN tar -xf nyks_linux_arm64.tar.gz
 ENV PATH="/testnet/nyks/release:${PATH}"
 
-#==============================================
-# for new chain setup or new single node setup
-# RUN nyksd init validator-self --chain-id nyks
-#==============================================
 
+RUN nyksd init validator-self --chain-id nyks
 RUN nyksd keys add validator-self --keyring-backend test
 
 # ========================================================================================
@@ -78,7 +74,8 @@ WORKDIR /testnet
 COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
 RUN chmod +x /testnet/nyks_entrypoint.sh
 
-RUN cp -R /root/.nyks/ /testnet/
+RUN mkdir -p /testnet/data
+RUN cp -R /root/.nyks/* /testnet/data/
 WORKDIR /testnet
 
 RUN git clone https://github.com/twilight-project/btc-oracle.git
