@@ -41,7 +41,7 @@ RUN go mod tidy
 RUN USER=root ignite chain build --release
 WORKDIR /testnet/nyks/release
 RUN ls -a
-RUN tar -xf nyks_linux_arm64.tar.gz
+RUN tar -xf nyks_*
 ENV PATH="/testnet/nyks/release:${PATH}"
 
 

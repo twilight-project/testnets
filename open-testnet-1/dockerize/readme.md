@@ -63,3 +63,14 @@ As of now BTC oracle starts with a new wallet. If you have a an old one, please 
 The Docker compose used the following directories for persistent storage. If you want to remove all the data, delete the following
 1. /nyks/data/
 2. /psql/data/
+
+#### SSH into the container
+After the docker images are built and the container are running. you can ssh into the container using the below command.
+```bash
+docker ps
+```
+Above command will the active containers along with their Ids.
+
+```bash
+then do docker exec -it <container id> /bin/bash
+```
