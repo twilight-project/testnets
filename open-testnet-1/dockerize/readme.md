@@ -72,5 +72,5 @@ docker ps
 Above command will the active containers along with their Ids.
 
 ```bash
-then do docker exec -it <container id> /bin/bash
+docker exec -it <container id> /bin/bash
 ```
