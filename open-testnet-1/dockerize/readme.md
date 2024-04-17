@@ -6,15 +6,17 @@ This repo contains docker files to run the Twilight.
 
 The Twilight Docker repo performs the following tasks:
 
-- 🔧 **Storage (Postgres)**: Creates a container for postgres with respective volume for persistent storage, creates Databases and applies schemas
+- **BTC Nodes**: This system will connect with bitcoin nodes we have deployed. In case someone wants to switch to their own nodes, update the forkscanner/nodes_setup.sql file.
 
-- 🌐 **Forkscanner**: Builds and runs forkscanner in a docker container
+- **Storage (Postgres)**: Creates a container for postgres with respective volume for persistent storage, creates Databases and applies schemas
 
-- ⬇️ **Network**: Create a network to allow inter container communication
+- **Forkscanner**: Builds and runs forkscanner in a docker container
 
-- ⚙️ **Nyks**: Builds and runs the Nyks chain
+- **Network**: Create a network to allow inter container communication
 
-- 🔌 **BTC Oracle**: Builds and runs the BTC Oracle 
+- **Nyks**: Builds and runs the Nyks chain
+
+- **BTC Oracle**: Builds and runs the BTC Oracle 
 
 ##  How To Run
 
