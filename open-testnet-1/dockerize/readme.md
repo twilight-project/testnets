@@ -79,9 +79,7 @@ docker exec -it <container id> /bin/bash
 ## Testing
 Once the containers are up you can run the following command to check if they are working fine.
 1. ```bash
-curl --location 'http://<ip address>:<port>' \
---header 'Content-Type: application/json' \
---data '{"method": "get_tips", "params": { "active_only": false }, "jsonrpc": "2.0", "id": 1}'
+curl --location 'http://<ip address>:<port>' --header 'Content-Type: application/json' --data '{"method": "get_tips", "params": { "active_only": false }, "jsonrpc": "2.0", "id": 1}'
 ```
  This will give us the current chaitips from forkscanner.It will only work if forkscanner is working properly. Please note that it can take some time (approx. 10 min), since forkscanner need to process 100 historic blocks before becoming active.
 
