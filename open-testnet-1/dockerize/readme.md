@@ -1,4 +1,4 @@
-# Twilight Testnet 🧪 ⚙️
+# Twilight Open-Testnet-1 🧪 ⚙️
 
 This repo contains docker files to run the Twilight.
 
@@ -6,7 +6,15 @@ This repo contains docker files to run the Twilight.
 
 ![Architecture Diagram](architecture-open-testnet-1.jpg)
 
-## ✨ Features
+## What's Included?
+- Nyks (pseudo name of the chain)
+- Forkscanner (monitors Bitcoin Mainnet for forks and update them inside the nyks blockchain)
+- BTC Oracle (communicates with Forkscanner and Nyks)
+
+## What's Not Included?
+- ZkOS or other VMs
+
+## Features
 
 The Twilight Docker repo performs the following tasks:
 
