@@ -88,13 +88,13 @@ docker exec -it <container id> /bin/bash
 
 ## Testing
 Once the containers are up you can run the following command to check if they are working fine.
-1. ```bash curl --location 'http://<ip address>:<port>' --header 'Content-Type: application/json' --data '{"method": "get_tips", "params": { "active_only": false }, "jsonrpc": "2.0", "id": 1}' ```
+1. ```curl --location 'http://<ip address>:<port>' --header 'Content-Type: application/json' --data '{"method": "get_tips", "params": { "active_only": false }, "jsonrpc": "2.0", "id": 1}' ```
  This will give us the current chaitips from forkscanner.It will only work if forkscanner is working properly. Please note that it can take some time (approx. 10 min), since forkscanner need to process 100 historic blocks before becoming active.
 
- 2. ```bash curl http://localhost:26657/status ```
+ 2. ```curl http://localhost:26657/status ```
  This will retrieve the current status for the nyks node. This contains information such as no. of peers and if the node is catching up.
 
- 3. ```bash docker exec -it <psql container id> psql -U forkscanner -d forkscanner ```
-    ```bash docker exec -it <psql container id> psql -U forkscanner -d judge ```
+ 3. ```docker exec -it <psql container id> psql -U forkscanner -d forkscanner ```
+    ```docker exec -it <psql container id> psql -U forkscanner -d judge ```
     These commands will open psql for the database Forkscanner (used by Forkscanner) and Judge(used by Btc-Oracle) respectively.
 
