@@ -2,11 +2,15 @@
 
 This repo contains docker files to run the Twilight.
 
+## Architecture
+
+![Architecture Diagram](architecture-open-testnet-1.jpeg)
+
 ## ✨ Features
 
 The Twilight Docker repo performs the following tasks:
 
-- **BTC Nodes**: This system will connect with bitcoin nodes we have deployed. In case someone wants to switch to their own nodes, update the forkscanner/nodes_setup.sql file.
+- **BTC Nodes**: This system will connect with hosted bitcoin nodes. In case switch to switch to your own node, pleasea update the forkscanner/nodes_setup.sql file.
 
 - **Storage (Postgres)**: Creates a container for postgres with respective volume for persistent storage, creates Databases and applies schemas
 
