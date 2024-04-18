@@ -105,3 +105,8 @@ You can use the following create-validator command to become a validator:
 ```
 nyksd tx staking create-validator --amount=100000000nyks --pubkey=[your-pub-key] --moniker="validator-self" --chain-id=nyks --commission-rate="0.10" --commission-max-rate="0.20" --commission-max-change-rate="0.01" --min-self-delegation="1" --gas="auto" --gas-prices="0nyks" --from=validator-self --keyring-backend test
 ```
+To query the active set:
+
+```
+nyksd query staking validators
+```
