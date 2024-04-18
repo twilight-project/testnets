@@ -93,3 +93,8 @@ Once the containers are up you can run the following command to check if they ar
 
  2. ```bash curl http://localhost:26657/status ```
  This will retrieve the current status for the nyks node. This contains information such as no. of peers and if the node is catching up.
+
+ 3. ```bash docker exec -it <psql container id> psql -U forkscanner -d forkscanner ```
+    ```bash docker exec -it <psql container id> psql -U forkscanner -d judge ```
+    These commands will open psql for the database forkscanner (used by forkscanner) and judge(used by btc-oracle) respectively.
+
