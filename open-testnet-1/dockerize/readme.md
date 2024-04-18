@@ -14,9 +14,9 @@ This repo contains docker files to run the Twilight.
 ## What's Not Included?
 - ZkOS or other VMs
 
-## Features
+## Docker Features
 
-The Twilight Docker repo performs the following tasks:
+The Twilight docker repo performs the following tasks:
 
 - **BTC Nodes**: This system will connect with hosted bitcoin nodes. In case switch to switch to your own node, pleasea update the forkscanner/nodes_setup.sql file.
 
@@ -30,7 +30,7 @@ The Twilight Docker repo performs the following tasks:
 
 - **BTC Oracle**: Builds and runs the BTC Oracle 
 
-##  How To Run
+###  How To Run
 
 To run Twilight, follow these steps:
 
@@ -62,7 +62,6 @@ docker-compose down
 docker-compose up
 ```
 
-
 ## Configurations
 
 #### Nyks
@@ -86,7 +85,6 @@ Above command will the active containers along with their Ids.
 ```bash
 docker exec -it <container id> /bin/bash
 ```
-
 
 ## Testing
 Once the containers are up you can run the following command to check if they are working fine.
