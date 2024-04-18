@@ -96,5 +96,6 @@ Once the containers are up you can run the following command to check if they ar
 
  3. ```docker exec -it <psql container id> psql -U forkscanner -d forkscanner ```
     ```docker exec -it <psql container id> psql -U forkscanner -d judge ```
-    These commands will open psql for the database Forkscanner (used by Forkscanner) and Judge(used by Btc-Oracle) respectively.
+    These commands will open psql for the database Forkscanner (used by Forkscanner) and Judge(used by Btc-Oracle) respectively. Afterwards you can query the chaintips table. 
+    ```select * from chaintips;```
 
