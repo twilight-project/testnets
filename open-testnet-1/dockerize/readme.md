@@ -4,7 +4,7 @@ This repo contains docker files to run the Twilight.
 
 ## Architecture
 
-![Architecture Diagram](architecture-open-testnet-1.jpeg)
+![Architecture Diagram](architecture-open-testnet-1.jpg)
 
 ## ✨ Features
 
