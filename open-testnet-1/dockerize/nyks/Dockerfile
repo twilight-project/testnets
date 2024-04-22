@@ -61,7 +61,7 @@ RUN nyksd keys add validator-self --keyring-backend test
 # for joining existing chain
 
 COPY ./nyks/genesis.json /root/.nyks/config/genesis.json
-RUN sed -i 's/persistent_peers = ""/persistent_peers = "aa0fd7534f2b4ab69d7d7d0465eb19027261a2f8@64.23.150.96:26656"/' /root/.nyks/config/config.toml
+RUN sed -i 's/persistent_peers = ""/persistent_peers = "cfac2e24742cc7ad3f972c0c9e0228d051abd034@64.23.150.96:26656"/' /root/.nyks/config/config.toml
 # ========================================================================================
 
 RUN sed -i '11s/.*/minimum-gas-prices = "0nyks"/' /root/.nyks/config/app.toml
