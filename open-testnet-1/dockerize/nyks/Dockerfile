@@ -81,7 +81,7 @@ WORKDIR /testnet
 RUN git clone https://github.com/twilight-project/btc-oracle.git
 WORKDIR /testnet/btc-oracle
 RUN git fetch origin
-RUN git checkout dev
+RUN git checkout develop
 RUN sed -i '9s|.*|github.com/btcsuite/btcd v0.22.1|' /testnet/nyks/go.mod
 RUN go mod tidy
 ENV CGO_ENABLED=0
