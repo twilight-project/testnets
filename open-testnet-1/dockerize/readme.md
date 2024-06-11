@@ -18,7 +18,7 @@ This repo contains docker files to run the Twilight.
 
 The Twilight docker repo performs the following tasks:
 
-- **BTC Nodes**: This system will connect with hosted bitcoin nodes. In case switch to your own node, pleasea update the forkscanner/nodes_setup.sql file.
+- **BTC Nodes**: This system will connect with hosted bitcoin nodes. In case switch to switch to your own node, pleasea update the forkscanner/nodes_setup.sql file.
 
 - **Storage (Postgres)**: Creates a container for postgres with respective volume for persistent storage, creates Databases and applies schemas
 
@@ -55,7 +55,7 @@ The name of the nyks release executable file varies depending on the processor's
 
 #### Key Points to Consider
 1. When the docker starts the chain. it will go into initial block download (IBD) phase. This means that your node has joined the chain and is catching up. We cannot run btc-oracle until the chain has caught up.
-2. When the chain starts, your twilight address will be displayed. Please ensure that this address has nyks tokens in it.
+2. When the chain starts, your twilight address will be displayed. Once the chain is up to date, please get back to us so that we can send nyks tokens to your address. 
 3. Once the IBD is done, go to ./scripts/nyks_entrypoint.sh file and uncomment line 10. Then simply rerun the container using the commands 
 ```bash
 docker-compose down
@@ -67,8 +67,18 @@ docker-compose up
 #### Nyks
 As of now the docker container builds and joins to an existing chain. If you want to star a standalone node or a new chain, then docker file needs to be changed. This information is mentioned as comments in the ./nyks/dockerfile. 
 
+#### Forkscanner
+We have configures Forkscanner to connect to 3 of our btc nodes, if you want to change the connection settings please refer to /forkscanner/nodes_setup.sql file.
+
 #### BTC Oracle
-As of now BTC oracle starts with a new wallet. If you have a an old one, please use the --mnemonic flag, followed by the 12 word mnemonic. An example is mentioned in ./scripts/nyks_entrypoint.sh
+Right now there is a simple built in btc wallet. To init this wallet there are 3 options mentioned below.
+
+1. A new wallet. in which case we will create a new mnemonic and share it with you.
+    `/testnet/btc-oracle/forkoracle-go --new_wallet true`
+2. Import wallet with mnemonic. in which case you can provide the 12 word mnemonic and we will generate the keypair from it.
+    `/testnet/btc-oracle/forkoracle-go --new_wallet true  --mnemonic "<12 word mnemonic>"`
+3. Load wallet. in which case we will load a wallet using the encrypted seed file iv.txt.  
+    `/testnet/btc-oracle/forkoracle-go`
 
 #### Storage
 The Docker compose used the following directories for persistent storage. If you want to remove all the data, delete the following
@@ -105,3 +115,34 @@ You can use the following create-validator command to become a validator:
 ```
 nyksd tx staking create-validator --amount=100000000nyks --pubkey=[your-pub-key] --moniker="validator-self" --chain-id=nyks --commission-rate="0.10" --commission-max-rate="0.20" --commission-max-change-rate="0.01" --min-self-delegation="1" --gas="auto" --gas-prices="0nyks" --from=validator-self --keyring-backend test
 ```
+
+## Create a new network
+To create a new network please refer to the docekrize/nyks/Dockerfile file. please uncomment the "new network" section and comment out the "join network" section near line 50.
+
+## Grafana Stats
+To Enable Grafana stats, please ssh into container using the steps mentioned above. the configurations can be found in the following file
+
+1. /root/.nyks/config/config.toml section "Instrumentation Configuration Options"
+2. /root/.nyks/config/app.toml section "Telemetry Configuration"
+
+here are the sample configurations to enable these
+
+[telemetry]
+service-name = ""
+enabled = true
+enable-hostname = true
+enable-hostname-label = true
+enable-service-label = true
+prometheus-retention-time = 5000
+global-labels = []
+
+[instrumentation]
+prometheus = true
+prometheus_listen_addr = ":26660"
+max_open_connections = 3
+namespace = "tendermint"
+
+Once the stats are enabled, they will be available on port 26660. you can visit this [link](https://medium.com/@ironsf/zetachain-testnet-monitoring-with-grafana-35609cd9308e) for a complete guide on how to deploy a prometheus and grafana server
+
+latest_sweep_tx_hash stat is broadcasted by btc-oracle on port 2555
+

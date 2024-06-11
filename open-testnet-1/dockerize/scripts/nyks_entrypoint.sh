@@ -3,7 +3,7 @@ cp -Rv /testnet/data/* /root/.nyks/
 nyksd start
 
 # =====================================================
-#uncomment once the Chain is up to date.
+#Uncomment once the chain is up to date.
 # nyksd keys show validator-self -a --keyring-backend test
 # sleep 900
 # cd /testnet/btc-oracle
