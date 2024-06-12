@@ -41,7 +41,7 @@ RUN go mod tidy
 RUN USER=root ignite chain build --release
 WORKDIR /testnet/nyks/release
 RUN ls -a
-RUN tar -xf nyks_*
+RUN tar -xf nyks_darwin_arm64.tar.gz
 ENV PATH="/testnet/nyks/release:${PATH}"
 
 
@@ -51,17 +51,17 @@ RUN nyksd keys add validator-self --keyring-backend test
 # ========================================================================================
 # for new chain setup or new single node setup
 
-# RUN ./nyksd add-genesis-account validator-self 100000000000nyks --keyring-backend test
-# RUN ./nyksd gentx validator-self 100000000nyks --chain-id nyks --keyring-backend test 
-# RUN ./nyksd collect-gentxs
-# RUN sed -i 's/stake/nyks/g' /root/.nyks/config/genesis.json
+RUN ./nyksd add-genesis-account validator-self 100000000000nyks --keyring-backend test
+RUN ./nyksd gentx validator-self 100000000nyks --chain-id nyks --keyring-backend test 
+RUN ./nyksd collect-gentxs
+RUN sed -i 's/stake/nyks/g' /root/.nyks/config/genesis.json
 # ========================================================================================
 
 # ========================================================================================
 # for joining existing chain
 
-COPY ./nyks/genesis.json /root/.nyks/config/genesis.json
-RUN sed -i 's/persistent_peers = ""/persistent_peers = "cfac2e24742cc7ad3f972c0c9e0228d051abd034@64.23.150.96:26656"/' /root/.nyks/config/config.toml
+#COPY ./nyks/genesis.json /root/.nyks/config/genesis.json
+#RUN sed -i 's/persistent_peers = ""/persistent_peers = "cfac2e24742cc7ad3f972c0c9e0228d051abd034@64.23.150.96:26656"/' /root/.nyks/config/config.toml
 # ========================================================================================
 
 RUN sed -i '11s/.*/minimum-gas-prices = "0nyks"/' /root/.nyks/config/app.toml
