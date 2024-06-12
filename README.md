@@ -1,2 +1,2 @@
 # Testnets
-This Repo contains steps to join testnet. Each folder contains information about joining a specific testnet.
+This repository contains detailed instructions for joining various testnets. Each directory is dedicated to a specific testnet and provides all necessary information and steps for participation.
