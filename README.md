@@ -1,2 +1,2 @@
 # Testnets
-This repository contains detailed instructions for joining various testnets. Each directory is dedicated to a specific testnet and provides all necessary information and steps for participation.
+This repository contains detailed instructions for joining testnets for Twilight network. Each directory is dedicated to a specific testnet and provides all necessary information and steps for participation.
