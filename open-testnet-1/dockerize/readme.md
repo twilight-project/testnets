@@ -20,84 +20,86 @@ This repository contains Docker files necessary for setting-up and executing the
 
 The Twilight docker script performs the following tasks:
 
-- **Forkscanner**: Builds and runs the Forkscanner. This system connects to 3 Twilight's hosted Bitcoin full nodes. If you prefer to use your own Bitcoin Core nodes, please update the `forkscanner/nodes_setup.sql` file with the relevant details.
-- **Storage (Postgres)**: Creates a container for Postgres with respective volume for persistent storage, creates databases, and applies schemas needed for Forscanner.
 - **Nyks**: Builds and runs the Nyks chain.
 - **BTC Oracle**: Builds and runs the BTC Oracle.
+- **Forkscanner**: Builds and runs the Forkscanner. This system connects to 3 Twilight's hosted Bitcoin full nodes. If you prefer to use your own Bitcoin Core nodes, please update the [nodes_setup.sql](/open-testnet-1/dockerize/forkscanner/nodes_setup.sql) file with the relevant details.
+- **Storage (Postgres)**: Creates a PostgreSQL container with a volume for persistent storage, sets up the necessary databases, and applies the required schemas for Forscanner.
+
 
 ###  How To Run
 
-To run Twilight, follow these steps:
+To build and run the Twilight node, follow these steps:
 
 1. Install [Docker](https://docs.docker.com/get-docker/) from the specified link.
 
-2. Make a clone of this repository.
+2. Make a clone of this [repository](https://github.com/twilight-project/testnets).
 
-3. Go to the `./testnets/open-testnet-1/dockerize`. This folder contains the main docker-compose.yml file
+3. Go to the [open-test-net](/open-testnet-1/dockerize/) folder. This contains the main docker-compose.yml file.
 
-4. Select the appropriate [Processor Architecture] and [configuration] options. 
+4. Select the appropriate [Processor Architecture](#processor-architecture) for your node and update the [configuration](#configurations) options. 
+
 5. run the command
 
 ```bash
-docker-compose up
+   docker-compose up
 ```
 This command will create docker containers, clone Twilight repositories, and then build and initialize the chain. 
 
-6. Transfer nyks tokens to the node's user account
-
+6. SSH into the [docker](#ssh-connection-to-the-container) container.
+```bash
+   cd ./btc-oracle
+``` 
 7. Start BTC-Oracle using the following command
 
 ```bash
-    `/testnet/btc-oracle/forkoracle-go --new_wallet true`
+   ./testnet/btc-oracle/forkoracle-go --new_wallet true &
 ```
 
 #### Processor Architecture
-The name of the nyks release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 45 in the `/nyks/Dockerfile` accordingly:
+The name of the nyks release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 44 in the [nyks/Dockerfile](/open-testnet-1/dockerize/nyks/Dockerfile) accordingly:
 1. For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
 2. For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
 3. For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
 
 ## Configurations
 
-#### Nyks
-Currently, the Docker container is configured to build a standalone node and create a new chain. If you wish to join an existing chain, modifications to the Dockerfile will be necessary. 
-##### Instructions for joining existing network
-    Make the following changes in `./testnet/open-testnet-1/nyks/Dockerfile`   
-    1. Comment out the section for `single node setup`
-    2. Uncomment the section for `joining existing chain`
-    3. Provide the `genesis.json` and `persistent_peers.txt` for the existing chain.
+### Nyks
+Currently, the Docker container is configured to build a standalone node and creates a new chain. If you wish to join an existing chain, modifications to the Dockerfile will be necessary. 
+#### Instructions for joining existing network
+Make the following changes in [Dockerfile](/open-testnet-1/dockerize/nyks/Dockerfile)
+1. Comment out the section for `single node setup`
+2. Uncomment the section for `joining existing chain`
+3. Provide the `genesis.json` and `persistent_peers.txt` for the existing chain [here](/open-testnet-1/required-files/).
 
-##### Key Points to Consider
-1. Upon initialization, the node will enter the Initial Block Download (IBD) phase. This indicates that your node has joined the chain and is currently synchronizing. During this period, BTC-Oracle cannot be run until the chain has fully caught up. 
-2. Once the IBD is done, go to ./scripts/nyks_entrypoint.sh file and uncomment line 10. Then simply rerun the container using the commands 
+4. Upon initialization, the node will enter the Initial Block Download (IBD) phase. This indicates that your node has joined the chain and is currently synchronizing. During this period, BTC-Oracle cannot be run until the chain has fully caught up. 
+5. Once the IBD is done, go to [entrypoint_nyks.sh](/open-testnet-1/dockerize/scripts/nyks_entrypoint.sh) file and uncomment line 10. Then simply rerun the container using the commands 
 ```bash
-docker-compose down
-docker-compose up
+   docker-compose down
+   docker-compose up
 ```    
 
-#### BTC Oracle
-BTC-Oracle supports a builtin BTC wallet. It is mandatory to initialize a wallet while starting BTC-Oracle.
-There are 3 possible ways to initialize the wallet.
-1. Create a new wallet. 
+### BTC Oracle
+BTC-Oracle includes a built-in BTC wallet, and initializing this wallet is mandatory when starting BTC-Oracle. There are three methods to initialize the wallet:
+1. Create a New Wallet
 ```bash
-    `/testnet/btc-oracle/forkoracle-go --new_wallet true`
+    /testnet/btc-oracle/forkoracle-go --new_wallet true
 ```
 BTC-Oracle creates a new wallet and return the 12 word mnemnic to the client for safekeeping. The wallet seed is encrypted and saved in `iv.txt` file.  
 
-2. Import wallet with mnemonic. 
+2. Import Wallet with Mnemonic 
 ```bash
-    `/testnet/btc-oracle/forkoracle-go --new_wallet true  --mnemonic "<12 word mnemonic>"`
+    /testnet/btc-oracle/forkoracle-go --new_wallet true  --mnemonic "<12 word mnemonic>"
 ```
-    In this case, the client provides the 12 word mnemonic and the BTC-Oracle reconstructs the seed and keypairs from it.
+In this scenario, the client provides the 12 word mnemonic and the BTC-Oracle reconstructs the seed and keypairs from it.
 
-3. Load wallet.
+3. Load Existing Wallet
 ```bash 
-    `/testnet/btc-oracle/forkoracle-go`
+    /testnet/btc-oracle/forkoracle-go
 ```
-BTC-Oracle loads an existing wallet using the encrypted seed file `iv.txt`.  
+BTC-Oracle will load an existing wallet using the encrypted seed file `iv.txt`.  
 
-#### Storage
-The Docker container uses the following directories for persistent storage. Delete the following folders to remove all the data, 
+### Storage
+The Docker container uses the following directories for persistent storage. Delete the following folders to completely remove all chain data, 
 1. /nyks/data/
 2. /psql/data/
 
@@ -106,14 +108,14 @@ A user can SSH into the container using the following commands:
 
 1. List the active containers along with their IDs:
 ```bash
-docker ps
+   docker ps
 ```
 2. Access the desired container using its ID:
 ```bash
-docker exec -it <container_id> /bin/bash
+   docker exec -it <container_id> /bin/bash
 ```
 ## Testing
-Execute the following commands to verify the system.
+Run the following commands to validate the system.
 
 1. ```curl --location 'http://<ip address>:<port>' --header 'Content-Type: application/json' --data '{"method": "get_tips", "params": { "active_only": false }, "jsonrpc": "2.0", "id": 1}' ```
 
@@ -136,16 +138,17 @@ nyksd tx staking create-validator --amount=100000000nyks --pubkey=[your-pub-key]
 ```
 
 ## Create a new network
-To create a new network please refer to the docekrize/nyks/Dockerfile file. please uncomment the "new network" section and comment out the "join network" section near line 50.
+To create a new network please refer to the [nyks/Dockerfile](/open-testnet-1/dockerize/nyks/Dockerfile). Please uncomment the `new network` section and comment out the `join network` section.
 
 ## Grafana Stats
-To Enable Grafana stats, please SSH into container. The configurations can be found in the following file
+To enable Grafana stats, please [SSH](#ssh-connection-to-the-container) into the container. The configurations can be found in the following file
 
-1. /root/.nyks/config/config.toml section "Instrumentation Configuration Options"
-2. /root/.nyks/config/app.toml section "Telemetry Configuration"
+1. [Instrumentation configuration](#instrumentation-configuration) section is found in `/root/.nyks/config/config.toml`  
+2.  [Telemetry configuration](#telemetry-configuration) section is found in `/root/.nyks/config/app.toml`  
 
-here are the sample configurations to enable these
-
+Sample configurations to enable stats
+#### Telemetry Configuration
+```
 [telemetry]
 service-name = ""
 enabled = true
@@ -154,13 +157,15 @@ enable-hostname-label = true
 enable-service-label = true
 prometheus-retention-time = 5000
 global-labels = []
-
+```
+#### Instrumentation Configuration
+```
 [instrumentation]
 prometheus = true
 prometheus_listen_addr = ":26660"
 max_open_connections = 3
 namespace = "tendermint"
+```
+After enabling the statistics, they will be accessible on port 26660. For detailed instructions on deploying a Prometheus and Grafana server, you can refer to this [link](https://medium.com/@ironsf/zetachain-testnet-monitoring-with-grafana-35609cd9308e)
 
-Once the stats are enabled, they will be available on port 26660. you can visit this [link](https://medium.com/@ironsf/zetachain-testnet-monitoring-with-grafana-35609cd9308e) for a complete guide on how to deploy a prometheus and grafana server
-
-`latest_sweep_tx_hash` stat is broadcasted by btc-oracle on port 2555
+`latest_sweep_tx_hash` stat is broadcasted by btc-oracle   on port 2555
