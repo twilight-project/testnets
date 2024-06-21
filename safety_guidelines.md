@@ -74,5 +74,5 @@ Securing your NYKS Network node involves a multi-layered approach addressing var
 
 
 # Note
-As of this writing, NYKS is still in Testing phase and it is considered #reckless to put any life altering amounts of BTC into the network.
+As of this writing, NYKS is still in Testing phase and it is considered *reckless* to put any life altering amounts of BTC into the network.
 That said, we constantly put in a lot of effort to make this safer to use. We will update this documentation with each safety mechanism that we implement.
