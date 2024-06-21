@@ -69,10 +69,10 @@ This backup file should be stored on one or multiple reliable offline devices. R
 
 If both the wallet and all backups are lost for any reason, the bitcoins associated with this wallet will become permanently inaccessible.
 
-Summary
-Securing your Twilight Network node involves a multi-layered approach addressing various risks. By following these best practices, you can protect your node from unauthorized access, loss, and theft, ensuring the security and integrity of your funds.
+##Summary
+Securing your NYKS Network node involves a multi-layered approach addressing various risks. By following these best practices, you can protect your node from unauthorized access, loss, and theft, ensuring the security and integrity of your funds.
 
 
 # Note
 As of this writing, NYKS is still in Testing phase and it is considered #reckless to put any life altering amounts of BTC into the network.
-That said, we constantly put in a lot of effort to make lnd safer to use and more secure. We will update this documentation with each safety mechanism that we implement.
+That said, we constantly put in a lot of effort to make this safer to use. We will update this documentation with each safety mechanism that we implement.
