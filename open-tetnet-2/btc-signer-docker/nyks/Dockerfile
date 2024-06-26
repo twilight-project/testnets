@@ -76,21 +76,22 @@ RUN git checkout develop
 RUN sed -i '9s|.*|github.com/btcsuite/btcd v0.22.1|' /testnet/nyks/go.mod
 RUN go mod tidy
 ENV CGO_ENABLED=0
-RUN go build .
+RUN go build -o btcoracle
+RUN chmod +x btcoracle
 
 WORKDIR /testnet/btc-oracle/configs
 RUN sed -i '2s|.*|"accountName": "oracle-node",|' config.json
 RUN sed -i '4s|.*| "DB_host": "postgres_container",|' config.json
-RUN sed -i '8s|.*| "forkscanner_host": "btcoracle",|' config.json
 RUN sed -i '11s|.*| "nyksd_url": "http://0.0.0.0:1317",|' config.json
 RUN sed -i '12s|.*| "nyksd_socket_url" : "ws://0.0.0.0:26657/websocket",|' config.json
 
 WORKDIR /testnet
 COPY ./scripts/wait_for_it.sh /testnet/wait_for_it.sh
 RUN chmod +x /testnet/wait_for_it.sh
+
 COPY -Rv /testnet/data/* /root/.nyks/
 RUN nyksd start
-RUN chmod +x /testnet/btc-oracle/forkoracle-go
+
 
 EXPOSE 1317
 EXPOSE 26656

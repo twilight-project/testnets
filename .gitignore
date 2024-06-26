@@ -26,3 +26,9 @@ go.work
 
 ./open-testnet-1/btc-signer-docker/nyks/data/*
 ./open-testnet-1/btc-signer-docker/psql/data/*
+
+./open-testnet-2/validator-docker/nyks/data/*
+./open-testnet-2/validator-docker/psql/data/*
+
+./open-testnet-2/btc-signer-docker/nyks/data/*
+./open-testnet-2/btc-signer-docker/psql/data/*

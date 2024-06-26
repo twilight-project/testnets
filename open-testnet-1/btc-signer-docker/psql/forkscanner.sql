@@ -1,1 +1,0 @@
-GRANT ALL PRIVILEGES ON DATABASE btcoracle TO btcoracle;
