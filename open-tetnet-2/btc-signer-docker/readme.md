@@ -124,6 +124,7 @@ The following commands shall be used to create and manage BTC wallet on the offl
     bitcoin-cli getnewaddress
     ```
   Save the address for future use. This address shall be used to recieve/send funds on the BTC chain. 
+
 3. Obtain 33-byte BTC public key derived from the above address
     ```shell
     bitcoin-cli getaddressinfo <btc_address> | jq -r .pubkey
@@ -161,6 +162,7 @@ The `validator` option needs to be set to `true` in case the Signer is also runn
 Who can run a Signer:
  - Existing `Validator` who is not acting as `Judge` can be configured to also act as `Signer`
  - Any new node can register to act as a `Signer`
+
 Note: The `Signer` does not need to act as a Validator
  
 
