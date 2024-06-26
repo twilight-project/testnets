@@ -85,6 +85,11 @@ RUN sed -i '4s|.*| "DB_host": "postgres_container",|' config.json
 RUN sed -i '11s|.*| "nyksd_url": "http://0.0.0.0:1317",|' config.json
 RUN sed -i '12s|.*| "nyksd_socket_url" : "ws://0.0.0.0:26657/websocket",|' config.json
 
+# enable the validator
+RUN sed -i '13s|.*| "validator": false,|' config.json
+# configure the btc-oracle as Judge
+RUN sed -i '14s|.*| "running_mode": signer,|' config.json
+
 WORKDIR /testnet
 COPY ./scripts/wait_for_it.sh /testnet/wait_for_it.sh
 RUN chmod +x /testnet/wait_for_it.sh
