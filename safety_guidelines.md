@@ -1,6 +1,8 @@
-# Safety Guidelines for Secure Network
+# Safety Guidelines for Network Security
  
-Network node can be configured in multiple roles such as, Validator, Judge and/or Signer.  Operating a network node involves securing a range of cryptographic keys and ensuring the security of your funds. As a node operator, it is your responsibility to protect your node from unauthorized access, loss, and theft. Here are some best practices to help you secure your network node effectively.
+BTC oracle can be configured in either Judge or Signer mode.  Operating a nyks node involves securing a range of cryptographic keys and ensuring the security of your funds. As a node operator, it is your responsibility to protect your node from unauthorized access, loss, and theft. Here are some best practices to help you secure your network node effectively.
+
+At present, the network is under active development and constantly evolving. It is not recommended to put any large amounts of BTC into the network.
 
 ## 1. Device Security
 
@@ -66,9 +68,3 @@ This backup file should be stored on one or multiple reliable offline devices. R
 
 If both the wallet and all backups are lost for any reason, the bitcoins associated with this wallet will become permanently inaccessible.
 
-##Summary
-Securing your network node involves a multi-layered approach addressing various risks. By following these best practices, you can protect your node from unauthorized access, loss, and theft, ensuring the security and integrity of your funds.
-
-
-# Note
-At present, the network is under active development and constantly evolving. It is not recommended to put any large amounts of BTC into the network.
