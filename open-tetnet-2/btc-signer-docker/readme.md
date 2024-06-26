@@ -12,7 +12,31 @@ The btc-signer-docker script performs the following tasks:
 
 ## Architecture
 
-![Architecture Diagram](./btc-signer-setup-architecture.png)
+```text
+         xxxxxxxxx
+  xxxxxxxxx      xxxx
+xxx                 xx
+x     nyks network  xx
+x                   x
+xxx               xx
+   xxxxx   xxxxxxxx
+        xxx
+          ^                       +----------------------------------+
+          | broadcast/            |                                  |
+          | query BTC Tx          | firewalled/offline network zone  |
+          |                       |                                  |
+          v                       |                                  |
+  +----------------+   JSON-RPC   |   +-------------------------+    |
+  |   BTC oracle   +--------------+-->| bitcoind offline wallet |    |
+  |   Signer mode  |              |   +-------------------------+    |                
+  +-------+--------+              |                                  |
+          |                       |                                  |
+  +-------v--------+              +----------------------------------+
+  | forkscanner/   |
+  | bitcoind/btcd  |
+  +----------------+ 
+
+```
 
 ## 1. Overview
 The architecture includes the following components:
