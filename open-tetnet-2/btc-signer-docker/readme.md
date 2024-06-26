@@ -30,10 +30,8 @@ xxx               xx
   |   BTC oracle   +--------------+-->| bitcoind offline wallet |    |
   |   Signer mode  |              |   +-------------------------+    |                
   +-------+--------+              |                                  |
-          |                       |                                  |
-  +-------v--------+              +----------------------------------+
-  | bitcoind/btcd  |
-  +----------------+ 
+                                  |                                  |
+                                  +----------------------------------+
 
 ```
 
@@ -45,7 +43,8 @@ The architecture includes the following components:
 
 **For a production environment, it is highly recommended to deploy the bitcoind Offline Wallet and the nyks Full Node/btc-oracle on separate hosts**.
 
-The btc-oracle Signer design is based on the following documents:
+The btc-oracle offline signer design is based on remote signing available in bitcoind and lnd. Signer mode, however, does not require a BTC full node connection as the signer is not responsible for creating or broadcasting transactions.
+References:
 - [Bitcoind: Managing the Wallet](https://github.com/bitcoin/bitcoin/blob/master/doc/managing-wallets.md)
 - [Bitcoind: Offline Signing Tutorial](https://github.com/bitcoin/bitcoin/blob/master/doc/offline-signing-tutorial.md)
 - [Lightning: Remote Signing](https://github.com/lightningnetwork/lnd/blob/master/docs/remote-signing.md)
