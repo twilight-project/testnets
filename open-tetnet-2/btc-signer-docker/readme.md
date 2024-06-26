@@ -50,6 +50,8 @@ server=1
 # RPC server settings
 rpcuser=<rpc-username>
 rpcpassword=<rpc-password>
+# field <userpw> comes in the format: <USERNAME>:<SALT>$<HASH>.
+# rpcauth = <userpw>
 
 # Port your bitcoin node will listen for incoming requests;
 # listening for bitcoin mainnet
