@@ -22,7 +22,7 @@ This repository contains docker files necessary for setting-up and deploying the
 The Twilight docker script performs the following tasks:
 
 - **nyks**: Builds and runs the Cosmos SDK full node and btc-oracle program.
-- **forkscanner**: Builds and runs the Forkscanner program. This system connects to 3 Twilight's hosted Bitcoin full nodes. If you prefer to use your own Bitcoin Core nodes, please update the [nodes_setup.sql](/open-testnet-1/dockerize/forkscanner/nodes_setup.sql) file with the relevant details.
+- **forkscanner**: Builds and runs the Forkscanner program. This system connects to 3 Twilight's hosted Bitcoin full nodes. If you prefer to use your own Bitcoin Core nodes, please update the [nodes_setup.sql](/open-tetnet-2/validator-docker/forkscanner/nodes_setup.sql) file with the relevant details.
 - **Storage (Postgres)**: Creates a PostgreSQL container with a volume for persistent storage, sets up the necessary databases, and applies the required schemas.
 
 
@@ -34,7 +34,7 @@ To build and run the validator node, follow these steps:
 
 2. Make a clone of this [repository](https://github.com/twilight-project/testnets).
 
-3. Go to the [open-testnet-2](/open-testnet-2/validator-docker/) folder. This contains the main docker-compose.yml file.
+3. Go to the [open-testnet-2](/open-tetnet-2/validator-docker/) directory. This contains the main docker-compose.yml file.
 
 4. Select the appropriate [Processor Architecture](#processor-architecture) for your node and update the [configuration](#configurations) options. 
 
@@ -45,35 +45,84 @@ To build and run the validator node, follow these steps:
 ```
 This command will create docker containers, clone required repositories, and then build and initialize the chain. 
 
-6. SSH into the [docker](#ssh-connection-to-the-container) container.
+6. SSH into the `nyks` [docker](#ssh-connection-to-the-container) container.
 ```bash
-   cd ./btc-oracle
+   cd /testnet/nyks/release
+```
+7. Show the validator address. 
+```bash 
+nyksd keys show validator-self --bech val --keyring-backend test
+```
+8. Show the canonical account address of the validator. 
+```bash 
+nyksd keys show validator-self --keyring-backend test
+```
+9. Map the newly created validator in the chain to setup their `btcOracleAddress`, `btcPublicKey` and `validatorAddress` 
+```bash 
+nyksd tx nyks set-delegate-addresses <validator_address> <account_address> <btcPublicKey> --from <validator-self> --chain-id nyks --keyring-backend test
 ``` 
-7. Start `btc-oracle` using the following command
+where: 
+   - `validator_address` is the validator address of the new node.
+   - `account_address` is the canonical account address of the new node.
+   - `btcPublicKey` BTC public key associated with the validator. Forn the purposes of this testnet, any valid btcPublicKey can be used.   
 
+10. Start the `btc-oracle` once the `set-delegate-address` is executed  
 ```bash
+   cd /testnet/btc-oracle
    ./testnet/btc-oracle/btcoracle
 ```
 
 ## Run a Judge
 To build and run the validator node as Judge, follow these steps:
 
-1. Perform steps 1 - 5 of [run a Validator](#run-a-validator) to setup and deploy basic validator node.
+1. Perform steps 1 - 9 of [run a Validator](#run-a-validator) to setup and deploy basic validator node.
 
 2. SSH into the nyks [docker](#ssh-connection-to-the-container) container.
 goto the following folder
 ```bash
    cd /testnet/nyks/release/
 ``` 
-3. Register the Judge by initiating the fragment bootstrap process.
-   - Run the following command
-   # nyksd tx bridge bootstrap-fragment <judge_address><numOfSigners><threshold><signerApplicationFee>
-   <fragmentFeeBips><arbitraryData><validatorAddress>
-
-   nyks
+3. Register the Judge by initiating the fragment bootstrap process. 
    ```bash
-   nyksd tx bridge bootstrap-fragment $(nyksd keys show validator-self -a --keyring-backend test) 3 2 1 1;2D test --from validator-self --chain-id nyks --keyring-backend test
+   nyksd tx bridge bootstrap-fragment <judge_address><numOfSigners><threshold><signerApplicationFee><fragmentFeeBips><arbitraryData> --from validator-self --chain-id nyks --keyring-backend test
    ```
+   where: 
+   - `judgeAddress` = Ordinary twilight account address.
+   - `numOfSigners` = A Fragment should have 6 signers.
+   - `threshold` = Multisig threshold, minimum 2 signers.
+   - `signerApplicationFee` = Fragment specified fee for signers to send applications, this is for spam      protection. If a Fragment owner doesn’t accept an application, that Fee is confiscated by the module.
+   - `fragmentFeeBips` = Specify how much fee a Fragment wants to charge out of deposits.
+   - `arbitraryData` = Any string Fragment owner want to publish.
+
+   Example command setting up a fragment of 6 signers with a threshold of 4. 
+   ```bash
+   nyksd tx bridge bootstrap-fragment $(nyksd keys show validator-self -a --keyring-backend test) 6 4 1 1 test --from validator-self --chain-id nyks --keyring-backend test
+   ```
+4. Query the fragment information by using: 
+  ```bash
+   nyksd q volt get_all_fragments
+   ```
+   Communicate your fragment ID to signers and ask them to send signer applications.
+
+5. Accept signer applications using:
+   ```bash
+   nyksd tx volt accept-signers <fragmentID> <signerApplicationIds> --from validator-self --chain-id nyks --keyring-backend test
+   ```
+   where: 
+   - `fragmentId` = The ID of the fragment signer wants to join.
+   - `signerApplicationIds` = Comma-separated list of signer application IDs.
+
+   example command accepting a signer for fragment ID = 1
+   ```bash
+   nyksd tx volt accept-signers 1 1 --from validator-self --chain-id nyks --keyring-backend test
+   ```    
+6. Once, a fragment has all of the signers, register a reserve for a fragment ID using:
+   ```bash
+   nyksd tx bridge register-reserve-address <fragmentId> <reserveScript> <reserveAddress> --from validator-self --chain-id nyks --keyring-backend test
+   ```
+   - `fragmentId` = The ID of the fragment signer wants to join.
+   - `reserveScript` = BTC reserve script.
+   - `reserveAddress` = BTC reserve address.
 
 
 #### Processor Architecture

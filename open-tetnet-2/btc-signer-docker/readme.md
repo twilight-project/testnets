@@ -7,7 +7,7 @@ This folder contains docker files necessary for setting-up and deploying the Btc
 The btc-signer-docker script performs the following tasks:
 
 - **nyks**: Builds and runs the nyks full node using [Ignite CLI](https://docs.ignite.com) tools.
-- **btc-oracle**: Builds and runs the BTC Oracle.
+- **btc-oracle**: Builds and runs the [btc-oracle](https://github.com/twilight-project/btc-oracle).
 - **Storage (Postgres)**: Creates a PostgreSQL container with a volume for persistent storage, sets up the necessary databases, and applies the required schemas for `btc-oracle`.
 
 ## Architecture
@@ -43,7 +43,8 @@ The architecture includes the following components:
 
 **For a production environment, it is highly recommended to deploy the bitcoind Offline Wallet and the nyks Full Node/btc-oracle on separate hosts**.
 
-The btc-oracle offline signer design is based on remote signing available in bitcoind and lnd. Signer mode, however, does not require a BTC full node connection as the signer is not responsible for creating or broadcasting transactions.
+The btc-oracle offline signer design is based on remote signing available in `bitcoind` and `lnd`. Signer mode, however, does not require a BTC full node connection as the signer is not responsible for creating or broadcasting transactions.
+
 References:
 - [Bitcoind: Managing the Wallet](https://github.com/bitcoin/bitcoin/blob/master/doc/managing-wallets.md)
 - [Bitcoind: Offline Signing Tutorial](https://github.com/bitcoin/bitcoin/blob/master/doc/offline-signing-tutorial.md)
@@ -88,7 +89,7 @@ rpcallowip=0.0.0.0/0
 connect=0
 ```
 
-RPC connection authentication can be configured to use <rpc-username><rpc-password> pair or a <username and  HMAC-SHA-256 hashed password> through rpcauth option. It is not recommended to hardcode <rpc-password> in the config file. The salted hash can be created from canonical python script included in the share/rpcauth in bitcoin-core installed directory. 
+JSON-RPC connection authentication can be configured to use `rpc-username`:`rpc-password` pair or a `username and HMAC-SHA-256 hashed password` through rpcauth option. It is not recommended to hardcode `rpc-password` in the config file. The salted hash can be created from canonical python script included in the share/rpcauth in bitcoin-core installed directory. 
 
 ### 2.3. Run the RPC Server 
 
@@ -96,7 +97,7 @@ By default, the `bitcoind` server can be run using the following command.
 ```shell
 bitcoind
 ```
-In case, the a non-default home directory was used during installation:
+In case, a non-default home directory was used during installation:
 
 ```shell
 bitcoind -datadir=/path/to/bitcoin/home
@@ -109,7 +110,7 @@ The following commands shall be used to create and manage BTC wallet on the offl
     ```shell
     bitcoin-cli -named createwallet \
         wallet_name=<wallet_name> \
-        passphrase="<passphrase>" \
+        passphrase=<passphrase> \
         load_on_startup=true \
     ```
     Flags explanation:
@@ -132,7 +133,7 @@ Maintain a record of the public key in its hexadecimal string fromat. The btc pu
 
 4. The wallet can be unlocked on the offline host using the following command
 ```shell
-bitcoin-cli walletpassphrase "<passphrase>" <unlock_time>
+bitcoin-cli walletpassphrase <passphrase> <unlock_time>
 ```
 where:
 - `passphrase` is the same as when used for creating the wallet and,

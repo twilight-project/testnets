@@ -111,10 +111,6 @@ RUN chmod +x /testnet/wait_for_it.sh
 RUN chmod +x /testnet/btc-oracle/btcoracle
 # set working directory to /testnet/nyks/release
 WORKDIR /testnet/nyks/release
-# map the newly created validator address to the btcOracleAddress and btcPublic key on the chain
-# nyksd tx nyks set-delegate-addresses <validator_address> <account_address> <btcPublicKey> --from <key_name> --chain-id nyks --keyring-backend test
-RUN nyksd tx nyks set-delegate-addresses $(nyksd keys show validator-self -a --bech val --keyring-backend test) $(nyksd keys show validator-self -a --keyring-backend test) "btcPublicKey" --from validator-self --chain-id nyks --keyring-backend test
-
 
 
 EXPOSE 1317
