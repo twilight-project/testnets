@@ -11,8 +11,31 @@ The btc-signer-docker script performs the following tasks:
 - **Storage (Postgres)**: Creates a PostgreSQL container with a volume for persistent storage, sets up the necessary databases, and applies the required schemas for Btc-oracle.
 
 ## Architecture
+```text
+         xxxxxxxxx
+  xxxxxxxxx      xxxx
+xxx                 xx
+x     nyks network  xx
+x                   x
+xxx               xx
+   xxxxx   xxxxxxxx
+        xxx
+          ^                       +----------------------------------+
+          | broadcast/            |                                  |
+          | query BTC Tx          | firewalled/offline network zone  |
+          |                       |                                  |
+          v                       |                                  |
+  +----------------+   JSON-RPC   |   +-------------------------+    |
+  |   BTC oracle   +--------------+-->| bitcoind offline wallet |    |
+  |   Signer mode  |              |   +-------------------------+    |                
+  +-------+--------+              |                                  |
+          |                       |                                  |
+  +-------v--------+              +----------------------------------+
+  | forkscanner/   |
+  | bitcoind/btcd  |
+  +----------------+ 
 
-![Architecture Diagram](./btc-signer-setup-architecture.png)
+```
 
 ## 1. Overview
 The architecture includes the following components:
