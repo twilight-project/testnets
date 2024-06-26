@@ -40,38 +40,37 @@ To build and run the validator node, follow these steps:
 
 5. run the command
 
-```bash
+   ```bash
    docker-compose up
-```
-This command will create docker containers, clone required repositories, and then build and initialize the chain. 
+   ```
+   This command will create docker containers, clone required repositories, and then build and initialize the chain. 
 
 6. SSH into the `nyks` [docker](#ssh-connection-to-the-container) container.
-```bash
+   ```bash
    cd /testnet/nyks/release
-```
+   ```
 7. Show the validator address. 
-```bash 
-nyksd keys show validator-self --bech val --keyring-backend test
-```
+   ```bash 
+   nyksd keys show validator-self --bech val --keyring-backend test
+   ```
 8. Show the canonical account address of the validator. 
-```bash 
-nyksd keys show validator-self --keyring-backend test
-```
+   ```bash 
+   nyksd keys show validator-self --keyring-backend test
+   ```
 9. Map the newly created validator in the chain to setup their `btcOracleAddress`, `btcPublicKey` and `validatorAddress` 
-```bash 
-nyksd tx nyks set-delegate-addresses <validator_address> <account_address> <btcPublicKey> --from <validator-self> --chain-id nyks --keyring-backend test
-``` 
-where: 
+   ```bash 
+   nyksd tx nyks set-delegate-addresses <validator_address> <account_address> <btcPublicKey> --from <validator-self> --chain-id nyks --keyring-backend test
+   ``` 
+   where: 
    - `validator_address` is the validator address of the new node.
    - `account_address` is the canonical account address of the new node.
    - `btcPublicKey` BTC public key associated with the validator. Forn the purposes of this testnet, any valid btcPublicKey can be used.   
 
 10. Start the `btc-oracle` once the `set-delegate-address` is executed  
-```bash
-   cd /testnet/btc-oracle
-   ./testnet/btc-oracle/btcoracle
-```
-
+      ```bash
+      cd /testnet/btc-oracle
+      ./testnet/btc-oracle/btcoracle
+      ```
 ## Run a Judge
 To build and run the validator node as Judge, follow these steps:
 
@@ -79,9 +78,9 @@ To build and run the validator node as Judge, follow these steps:
 
 2. SSH into the nyks [docker](#ssh-connection-to-the-container) container.
 goto the following folder
-```bash
+   ```bash
    cd /testnet/nyks/release/
-``` 
+   ``` 
 3. Register the Judge by initiating the fragment bootstrap process. 
    ```bash
    nyksd tx bridge bootstrap-fragment <judge_address><numOfSigners><threshold><signerApplicationFee><fragmentFeeBips><arbitraryData> --from validator-self --chain-id nyks --keyring-backend test
@@ -125,21 +124,21 @@ goto the following folder
    - `reserveAddress` = BTC reserve address.
 7. Start the `btc-oracle` once the `register-reserve-address` is executed  
    ```bash
-      cd /testnet/btc-oracle
-      ./testnet/btc-oracle/btcoracle
+   cd /testnet/btc-oracle
+   ./testnet/btc-oracle/btcoracle
    ```
 
-#### Processor Architecture
+### Processor Architecture
 The name of the `nyks` release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 47 in the [nyks/Dockerfile](/open-tetnet-2/validator-docker/nyks/Dockerfile) accordingly:
-1. For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
-2. For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
-3. For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
+- For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
+- For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
+- For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
 
-## Configurations
+### Configurations
 
-### nyks
+#### nyks
 Currently, the docker container is configured to build a standalone node and creates a new chain. If you wish to join an existing chain, modifications to the [Dockerfile](/open-tetnet-2/validator-docker/nyks/Dockerfile) will be necessary. 
-#### Instructions for joining existing network
+##### Instructions for joining existing network
 Make the following changes in the docker script to join an existing network. 
 1. Comment out the section for `single node setup`
 2. Uncomment the section for `joining existing chain`
