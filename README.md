@@ -10,7 +10,7 @@ This provides guide to setup and deploy a standard validator node along with sta
 
 This folder contains two separate docker files organized to setup and deploy testnet nodes as follows
 
-- validator-docker: This contains the setup environment ans instructions to deploy a standard validator node along with btc-oracle instance configured as a validator/judge. The instructions to setup a new testnet are also provided here.
+- validator-docker: This contains the setup environment and instructions to deploy a standard validator node along with btc-oracle instance configured as a validator/judge. The instructions to setup a new testnet are also provided here.
 
 - btc-signer-docker: This folder constains detailed instructions for setting up a node to act as a Btc Fragments signer.  
 
