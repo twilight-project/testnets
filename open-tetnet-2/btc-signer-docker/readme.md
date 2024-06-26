@@ -52,7 +52,7 @@ The btc-oracle Signer design is based on the following documents:
 
 ## 2. BTC offline wallet setup
 
-We recommend using an instance of [bitcoin-core] (https://bitcoin.org/en/releases/27.0/) configured in the Offline signing wallet mode. 
+We recommend using an instance of [bitcoin-core] (https://bitcoin.org/en/releases/27.0/) configured in the Offline signing wallet mode.The Bitcoin Core wallet is the preferred choice because it enables clients to utilize external signers and boasts a long-standing, rigorously tested codebase.
 
 For ensuring wallet security, it is strongly recommended to use a separate host system with atleast 4 GB RAM and 2 GB available storage space. The system should be completely disconnected from all public networks (internet, tor, wifi etc.). The `offline` wallet host is not required to download or synchronize blockchain data.
 
@@ -148,8 +148,24 @@ bitcoin-cli restorewallet <wallet-name> /path/to/backup/wallet.dat
 It is recommended to take periodic backups of the wallet to keep it secure.     
 
 ## 3. Setup btc-oracle
+### Overview
+`btc-oracle` is a service that can be configured to work in Validator/Judge/Signer mode. This can be done through setting the appropriate parameters in `config.json` file. 
 
-The `btc-oracle` can be deployed using the provided docker file. The file contains instructions to deploy a NYKS full node and connect it to an existing network and BTC Oracle.
+Set 
+```
+"running_mode" = signer
+"validator" = false
+``` 
+The `validator` option needs to be set to `true` in case the Signer is also running as a `Validator`.  
+
+Who can run a Signer:
+ - Existing `Validator` who is not acting as `Judge` can be configured to also act as `Signer`
+ - Any new node can register to act as a `Signer`
+Note: The `Signer` does not need to act as a Validator
+ 
+
+### Setup
+The `btc-oracle` can be deployed using the provided docker file. The file contains instructions to deploy a `nyks` full node and connect it to an existing network.
 
 To build and run the NYKS node, follow these steps:
 
