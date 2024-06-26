@@ -85,13 +85,13 @@ rpcbind=0.0.0.0
 # Needed for remote node connectivity
 # btc-oracle IP should only be allowed 
 rpcallowip=0.0.0.0/0
-# IMPORTANT: Offline Wallet server shouldn't connect to any external p2p or chain node
+# Offline Wallet server shouldn't connect to any external p2p or chain node
 connect=0
 ```
 
 RPC connection authentication can be configured to use <rpc-username><rpc-password> pair or a <username and  HMAC-SHA-256 hashed password> through rpcauth option. It is not recommended to hardcode <rpc-password> in the config file. The salted hash can be created from canonical python script included in the share/rpcauth in bitcoin-core installed directory. 
 
-### 2.3. Boot the RPC Server
+### 2.3. Run the RPC Server 
 
 By default, the `bitcoind` server can be run using the following command.
 ```shell
@@ -102,7 +102,7 @@ In case, the a non-default home directory was used during installation:
 ```shell
 bitcoind -datadir=/path/to/bitcoin/home
 ```
-### 2.3. Create Wallet 
+### 2.3. Manage Wallet 
 
 The following commands shall be used to create and manage BTC wallet on the offline host. The wallet will contain a single address controlled by a private key that will be used to sign transactions recieved from `btc-oracle`
 
