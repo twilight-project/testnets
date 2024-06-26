@@ -22,7 +22,7 @@ This repository contains docker files necessary for setting-up and deploying the
 The Twilight docker script performs the following tasks:
 
 - **nyks**: Builds and runs the Cosmos SDK full node and btc-oracle program.
-- **forkscanner**: Builds and runs the Forkscanner program. This system connects to 3 Twilight's hosted Bitcoin full nodes. If you prefer to use your own Bitcoin Core nodes, please update the [nodes_setup.sql](/open-tetnet-2/validator-docker/forkscanner/nodes_setup.sql) file with the relevant details.
+- **forkscanner**: Builds and runs the Forkscanner program. This system connects to 3 Twilight's hosted Bitcoin full nodes. If you prefer to use your own Bitcoin Core nodes, please update the [nodes_setup.sql](/open-testnet-2/validator-docker/forkscanner/nodes_setup.sql) file with the relevant details.
 - **Storage (Postgres)**: Creates a PostgreSQL container with a volume for persistent storage, sets up the necessary databases, and applies the required schemas.
 
 
@@ -34,7 +34,7 @@ To build and run the validator node, follow these steps:
 
 2. Make a clone of this [repository](https://github.com/twilight-project/testnets).
 
-3. Go to the [open-testnet-2](/open-tetnet-2/validator-docker/) directory. This contains the main docker-compose.yml file.
+3. Go to the [open-testnet-2](/open-testnet-2/validator-docker/) directory. This contains the main docker-compose.yml file.
 
 4. Select the appropriate [Processor Architecture](#processor-architecture) for your node and update the [configuration](#configurations) options. 
 
@@ -129,7 +129,7 @@ goto the following folder
    ```
 
 ### Processor Architecture
-The name of the `nyks` release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 47 in the [nyks/Dockerfile](/open-tetnet-2/validator-docker/nyks/Dockerfile) accordingly:
+The name of the `nyks` release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 47 in the [nyks/Dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile) accordingly:
 - For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
 - For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
 - For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
@@ -137,19 +137,19 @@ The name of the `nyks` release executable file varies depending on the processor
 ### Configurations
 
 #### nyks
-Currently, the docker container is configured to build a standalone node and creates a new chain. If you wish to join an existing chain, modifications to the [Dockerfile](/open-tetnet-2/validator-docker/nyks/Dockerfile) will be necessary. 
+Currently, the docker container is configured to build a standalone node and creates a new chain. If you wish to join an existing chain, modifications to the [Dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile) will be necessary. 
 ##### Instructions for joining existing network
 Make the following changes in the docker script to join an existing network. 
 1. Comment out the section for `single node setup`
 2. Uncomment the section for `joining existing chain`
-3. Provide the `genesis.json` and `persistent_peers.txt` for the existing chain [here](/open-tetnet-2/required-files/).
+3. Provide the `genesis.json` and `persistent_peers.txt` for the existing chain [here](/open-testnet-2/required-files/).
 
 4. Upon initialization, the node will enter the Initial Block Download (IBD) phase. This indicates that your node has joined the chain and is currently synchronizing. During this period, `btc-oracle` program cannot be run until the chain has synchronized completely. 
 
 ### btc-oracle
 The `btc-oracle` program can be configured to work in `Validator` and or `Judge` mode.
 The validator mode is enabled by default in this deployment. 
-Uncomment the following line in the [dockerfile](/open-tetnet-2/validator-docker/nyks/Dockerfile) to enable the validator to act as a `Judge` as well. 
+Uncomment the following line in the [dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile) to enable the validator to act as a `Judge` as well. 
 ```
 #RUN sed -i '14s|.*| "running_mode": judge,|' config.json
 ```
@@ -193,7 +193,7 @@ nyksd tx staking create-validator --amount=100000000nyks --pubkey=[your-pub-key]
 ```
 
 ## Create a new network
-To create a new network please refer to the [nyks/Dockerfile](/open-tetnet-2/validator-docker/nyks/Dockerfile). Please uncomment the `new network` section and comment out the `join network` section.
+To create a new network please refer to the [nyks/Dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile). Please uncomment the `new network` section and comment out the `join network` section.
 
 ## Grafana Stats
 To enable Grafana stats, please [SSH](#ssh-connection-to-the-container) into the container. The configurations can be found in the following file

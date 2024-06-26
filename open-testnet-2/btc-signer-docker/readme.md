@@ -1,6 +1,6 @@
 # Btc-Signer Setup Guide 🧪 ⚙️
 
-This folder contains docker files necessary for setting-up and deploying the Btc-Signer node according to the proposed [architecture](./btc-signer-setup-architecture.png).
+This folder contains docker files necessary for setting-up and deploying the Btc-Signer node according to the proposed [architecture](#architecture).
 
 ## Docker Features
 
@@ -175,16 +175,16 @@ To build and run the `nyks` node and the `btc-oracle`, follow these steps:
 
 2. Make a clone of this [repository](https://github.com/twilight-project/testnets).
 
-3. Go to the [btc-signer-docker](/open-tetnet-2/btc-signer-docker/) folder. This contains the main docker-compose.yml file.
+3. Go to the [btc-signer-docker](/open-testnet-2/btc-signer-docker/) folder. This contains the main docker-compose.yml file.
 
 4. Select the appropriate processor architecture for your node.
-   The name of the nyks release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 44 in the [nyks/Dockerfile](/open-tetnet-2/btc-signer-docker/nyks/Dockerfile) accordingly:
+   The name of the nyks release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 44 in the [nyks/Dockerfile](/open-testnet-2/btc-signer-docker/nyks/Dockerfile) accordingly:
 
    - For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
    - For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
    - For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
 
-5. Provide the `genesis.json` and `persistent_peers.txt` for the chain [here](/open-tetnet-2/required-files/). 
+5. Provide the `genesis.json` and `persistent_peers.txt` for the chain [here](/open-testnet-2/required-files/). 
 
 6. Run the folowing command to inititalize the docker
 
@@ -255,7 +255,7 @@ These commands will open psql for the database `btcoracle`. Afterwards you can q
 
 
 ## Grafana Stats
-Enable the [grafane](#grafana-stats/open-tetnet-2/validator-docker/readme.md) stats 
+Enable the [grafane](#grafana-stats/open-testnet-2/validator-docker/readme.md) stats 
 After enabling the statistics, they will be accessible on port 26660. For detailed instructions on deploying a Prometheus and Grafana server, you can refer to this [link](https://medium.com/@ironsf/zetachain-testnet-monitoring-with-grafana-35609cd9308e)
 
 `latest_sweep_tx_hash` stat is broadcasted by btc-oracle   on port 2555
