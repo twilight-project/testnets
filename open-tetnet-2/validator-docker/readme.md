@@ -99,7 +99,7 @@ goto the following folder
    nyksd tx bridge bootstrap-fragment $(nyksd keys show validator-self -a --keyring-backend test) 6 4 1 1 test --from validator-self --chain-id nyks --keyring-backend test
    ```
 4. Query the fragment information by using: 
-  ```bash
+   ```bash
    nyksd q volt get_all_fragments
    ```
    Communicate your fragment ID to signers and ask them to send signer applications.
@@ -123,7 +123,11 @@ goto the following folder
    - `fragmentId` = The ID of the fragment signer wants to join.
    - `reserveScript` = BTC reserve script.
    - `reserveAddress` = BTC reserve address.
-
+7. Start the `btc-oracle` once the `register-reserve-address` is executed  
+   ```bash
+      cd /testnet/btc-oracle
+      ./testnet/btc-oracle/btcoracle
+   ```
 
 #### Processor Architecture
 The name of the `nyks` release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 47 in the [nyks/Dockerfile](/open-tetnet-2/validator-docker/nyks/Dockerfile) accordingly:

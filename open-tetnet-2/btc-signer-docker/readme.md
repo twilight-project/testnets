@@ -123,30 +123,30 @@ The following commands shall be used to create and manage BTC wallet on the offl
     ```shell
     bitcoin-cli getnewaddress
     ```
-  Save the address for future use. This address shall be used to recieve/send funds on the BTC chain. 
+    Save the address for future use. This address shall be used to recieve/send funds on the BTC chain. 
 
 3. Obtain 33-byte BTC public key derived from the above address
     ```shell
     bitcoin-cli getaddressinfo <btc_address> | jq -r .pubkey
     ```
-Maintain a record of the public key in its hexadecimal string fromat. The btc public key will be used during the signer registration process when setting up the `btc-oracle` to act as Fragment `Signer`.  
+    Maintain a record of the public key in its hexadecimal string fromat. The btc public key will be used during the signer registration process when setting up the `btc-oracle` to act as Fragment `Signer`.  
 
 4. The wallet can be unlocked on the offline host using the following command
-```shell
-bitcoin-cli walletpassphrase <passphrase> <unlock_time>
-```
-where:
-- `passphrase` is the same as when used for creating the wallet and,
-- `unlock_time` is the amount of time the wallet is unlocked for in seconds
+    ```shell
+      bitcoin-cli walletpassphrase <passphrase> <unlock_time>
+    ```
+    where:
+    - `passphrase` is the same as when used for creating the wallet and,
+    - `unlock_time` is the amount of time the wallet is unlocked for in seconds
 
 5. The wallet can be backedup and restored 
-```shell
-# Backup the wallet
-bitcoin-cli -rpcwallet=<wallet-name> backupwallet /path/to/backup/wallet.dat
-# Restore the wallet
-bitcoin-cli restorewallet <wallet-name> /path/to/backup/wallet.dat
-```
-It is recommended to take periodic backups of the wallet to keep it secure.     
+    ```shell
+      # Backup the wallet
+      bitcoin-cli -rpcwallet=<wallet-name> backupwallet /path/to/backup/wallet.dat
+      # Restore the wallet
+      bitcoin-cli restorewallet <wallet-name> /path/to/backup/wallet.dat
+    ```
+    It is recommended to take periodic backups of the wallet to keep it secure.     
 
 ## 3. Setup btc-oracle
 ### Overview
@@ -169,7 +169,7 @@ Note: The `Signer` does not need to act as a Validator
 ### Setup
 The `btc-oracle` can be deployed using the provided docker file. The file contains instructions to deploy a `nyks` full node and connect it to an existing network.
 
-To build and run the NYKS node, follow these steps:
+To build and run the `nyks` node and the `btc-oracle`, follow these steps:
 
 1. Install [Docker](https://docs.docker.com/get-docker/) from the specified link.
 
@@ -178,33 +178,53 @@ To build and run the NYKS node, follow these steps:
 3. Go to the [btc-signer-docker](/open-tetnet-2/btc-signer-docker/) folder. This contains the main docker-compose.yml file.
 
 4. Select the appropriate processor architecture for your node.
-The name of the nyks release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 44 in the [nyks/Dockerfile](/open-testnet-1/btc-signer-docker/nyks/Dockerfile) accordingly:
+   The name of the nyks release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 44 in the [nyks/Dockerfile](/open-tetnet-2/btc-signer-docker/nyks/Dockerfile) accordingly:
 
-- For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
-- For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
-- For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
+   - For Linux on an Apple chipset, replace with `RUN tar -xf nyks_linux_arm64.tar.gz`.
+   - For Linux on an AMD/Intel chipset, replace with `RUN tar -xf nyks_linux_amd64.tar.gz`.
+   - For macOS on an Apple chipset, replace with `RUN tar -xf nyks_darwin_arm64.tar.gz`.
 
 5. Provide the `genesis.json` and `persistent_peers.txt` for the chain [here](/open-tetnet-2/required-files/). 
 
-5. run the command to inititalize the docker
+6. Run the folowing command to inititalize the docker
 
-```bash
-   docker-compose up
-```
-This command will create docker containers, clone required repositories, and then build and initialize the node. 
+    ```bash
+      docker-compose up
+    ```
+      This command will create docker containers, clone required repositories, and then build and initialize the node. 
 
-**Note**: 
-- Upon initialization, the node will enter the Initial Block Download (IBD) phase. This indicates that your node has joined the chain and is currently synchronizing. During this period, `btc-oracle` cannot be run until the chain has fully caught up. 
+     **Note**: 
+      - Upon initialization, the node will enter the Initial Block Download (IBD) phase. This indicates that your node has joined the chain and is currently synchronizing. During this period, `btc-oracle` cannot be run until the chain has fully caught up. 
 
-6. SSH into the [docker](#ssh-connection-to-the-container) container.
-```bash
-   cd ./btc-oracle
-``` 
-7. Start BTC-Oracle using the following command
+7. SSH into the nyks [docker](#ssh-connection-to-the-container) container.
+    ```bash
+      cd /testnet/nyks/release
+    ``` 
 
-```bash
-   ./testnet/btc-oracle/btcoracle 
-```
+8. Show the canonical account address of the node. 
+    ```bash 
+      nyksd keys show oracle-node --keyring-backend test
+    ```
+9. Send an application to join a fragment as signer. 
+    ```bash
+    nyksd tx volt signer-application <fragmentId> <applicationFee> <feeBips> <btcPubKey> --from oracle-node --chain-id nyks --keyring-backend test
+    ```
+    where: 
+    - `fragmentId` = The ID of the fragment signer wants to join.
+    - `applicationFee` = Signer can send any arbitrary fee.
+    - `feeBips` = Bips that a signer wants to charge out of a Fragments fee.
+    - `btcPubKey` = BTC Public Key for the signer that it will use to sign.
+
+   example command for signer joining a fragment with Id = 1 
+    ```bash
+    nyksd tx volt signer-application 1 1 1 03a34fa8b8371a6a14a2faec5e3e85b6d5f32f3c1603ad7a7b22d43aaabf47adad --from oracle-node --keyring-backend test --chain-id nyks    
+    ```    
+
+10. Start the `btc-oracle` once the `signer-application` is executed  
+    ```bash
+      cd /testnet/btc-oracle
+      ./testnet/btc-oracle/btcoracle
+    ```
 
 ### Storage
 The Docker container uses the following directories for persistent storage. Delete the following folders to completely remove all chain data, 
