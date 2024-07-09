@@ -19,7 +19,7 @@ This directory contains two separate docker files organized to setup and deploy 
 
 ### [BTC Signer Docker](/open-testnet-2/btc-signer-docker/)
 - **Purpose:** Set up a node to act as a BTC Fragments signer.
-- **Components:** Contains detailed instructions for setting up a standard network node and an offline signer for signing BTC transactions.
+- **Components:** includes the setup environment and detailed instructions for setting up a standard network node and an offline signer for signing BTC transactions.
 
 ## Instructions to Join the Latest Network
 
