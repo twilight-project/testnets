@@ -1,0 +1,73 @@
+version: '3.1'
+
+services:
+
+    postgres_container:
+        container_name: "postgres_container"
+        image: postgres:10
+        restart: unless-stopped
+        ports:
+            - "5442:5432"
+        volumes:
+            - ./psql/forkscanner.sql:/docker-entrypoint-initdb.d/forkscanner.sql
+            - ./psql/judge.sql:/docker-entrypoint-initdb.d/judge.sql
+            - ./psql/data:/var/lib/postgresql/data
+        environment:
+            LC_ALL: C.UTF-8
+            POSTGRES_USER: forkscanner
+            POSTGRES_PASSWORD: forkscanner
+            POSTGRES_DB: forkscanner
+        networks:
+            - network_conn
+
+    forkscanner:
+        container_name: "forkscanner"
+        build:
+          context: ./
+          dockerfile: ./forkscanner/Dockerfile
+        environment:
+            - DATABASE_URL=postgres://forkscanner:forkscanner@postgres_container/forkscanner
+        depends_on:
+            - postgres_container
+        links:
+            - postgres_container
+        ports:
+            - "8339:8339"
+            - "8340:8340"
+        expose:
+            - "8339"
+            - "8340"
+        command : ["./wait_for_it.sh", "postgres:5432", "--", "./fk_entrypoint.sh"]
+        networks:
+            - network_conn
+
+    nyks:
+        container_name: "nyks"
+        build:
+          context: ./
+          dockerfile: ./nyks/Dockerfile
+        ports:
+            - "1317:1317"
+            - "26656:26656"
+            - "26657:26657"
+            - "26660:26660"
+        expose:
+            - "1317"
+            - "26656"
+            - "26657"
+            - "26660"
+        volumes:
+            - ./nyks/data:/root/.nyks
+        # command : ["./wait_for_it.sh", "postgres:5432", "--", "./nyks_entrypoint.sh"]
+        command: ["./nyks_entrypoint.sh"]
+        networks:
+            - network_conn
+        environment:
+            - DATABASE_URL=postgres://forkscanner:forkscanner@postgres_container/judge
+        depends_on:
+            - postgres_container
+        links:
+            - postgres_container
+        
+networks:
+  network_conn:
