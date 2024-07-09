@@ -151,7 +151,7 @@ The `btc-oracle` program can be configured to work in `Validator` and or `Judge`
 The validator mode is enabled by default in this deployment. 
 Uncomment the following line in the [dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile) to enable the validator to act as a `Judge` as well. 
 ```
-#RUN sed -i '14s|.*| "running_mode": judge,|' config.json
+#RUN sed -i '23s|.*| "running_mode": judge,|' config.json
 ```
 ## Storage
 The Docker container uses the following directories for persistent storage. Delete the following folders to completely remove all chain data, 

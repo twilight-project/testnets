@@ -35,13 +35,13 @@ WORKDIR /testnet
 RUN git clone https://github.com/twilight-project/nyks.git
 WORKDIR /testnet/nyks
 RUN git fetch origin
-RUN git checkout open-testnet
+RUN git checkout clearingv03
 RUN go mod tidy
 
 RUN USER=root ignite chain build --release
 WORKDIR /testnet/nyks/release
 RUN ls -a
-RUN tar -xf nyks_darwin_arm64.tar.gz
+RUN tar -xf nyks_linux_arm64.tar.gz
 ENV PATH="/testnet/nyks/release:${PATH}"
 
 
@@ -72,7 +72,7 @@ WORKDIR /testnet
 RUN git clone https://github.com/twilight-project/btc-oracle.git
 WORKDIR /testnet/btc-oracle
 RUN git fetch origin
-RUN git checkout develop
+RUN git checkout fragments
 RUN sed -i '9s|.*|github.com/btcsuite/btcd v0.22.1|' /testnet/nyks/go.mod
 RUN go mod tidy
 ENV CGO_ENABLED=0
@@ -82,21 +82,19 @@ RUN chmod +x btcoracle
 WORKDIR /testnet/btc-oracle/configs
 RUN sed -i '2s|.*|"accountName": "oracle-node",|' config.json
 RUN sed -i '4s|.*| "DB_host": "postgres_container",|' config.json
-RUN sed -i '11s|.*| "nyksd_url": "http://0.0.0.0:1317",|' config.json
-RUN sed -i '12s|.*| "nyksd_socket_url" : "ws://0.0.0.0:26657/websocket",|' config.json
+RUN sed -i '14s|.*| "nyksd_url": "http://0.0.0.0:1317",|' config.json
+RUN sed -i '15s|.*| "nyksd_socket_url" : "ws://0.0.0.0:26657/websocket",|' config.json
 
-# enable the validator
-RUN sed -i '13s|.*| "validator": false,|' config.json
-# configure the btc-oracle as Judge
-RUN sed -i '14s|.*| "running_mode": signer,|' config.json
+# configure the btc-oracle as Signer
+RUN sed -i '23s|.*| "running_mode": signer,|' config.json
+# disable the validator
+RUN sed -i '25s|.*| "validator": false,|' config.json
 
 WORKDIR /testnet
 COPY ./scripts/wait_for_it.sh /testnet/wait_for_it.sh
+COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
 RUN chmod +x /testnet/wait_for_it.sh
-
-COPY -Rv /testnet/data/* /root/.nyks/
-RUN nyksd start
-
+RUN chmod +x /testnet/nyks_entrypoint.sh
 
 EXPOSE 1317
 EXPOSE 26656

@@ -1,3 +1,6 @@
+# Description: Entrypoint script for forkscanner container
+# runs diesel migrations and starts forkscanner
+
 cd /testnet/forkscanner
 diesel migration run
 diesel setup
