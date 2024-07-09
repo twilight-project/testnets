@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #   Use this script to test if a given TCP host/port are available
+# This script is used to verify that databases are properly initialized before starting binaries
 
 cmdname=$(basename $0)
 

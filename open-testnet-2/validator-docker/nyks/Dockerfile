@@ -38,13 +38,13 @@ WORKDIR /testnet
 RUN git clone https://github.com/twilight-project/nyks.git
 WORKDIR /testnet/nyks
 RUN git fetch origin
-RUN git checkout open-testnet-2
+RUN git checkout clearingv03
 RUN go mod tidy
 # build nyks chain node binary
 RUN USER=root ignite chain build --release
 WORKDIR /testnet/nyks/release
 RUN ls -a
-RUN tar -xf nyks_darwin_arm64.tar.gz
+RUN tar -xf nyks_linux_arm64.tar.gz
 ENV PATH="/testnet/nyks/release:${PATH}"
 
 # initialize the nyks chain node 
@@ -76,8 +76,8 @@ RUN sed -i '96s/.*/cors_allowed_origins = ["*"]/' /root/.nyks/config/config.toml
 RUN sed -i '91s/.*/laddr = "tcp:\/\/0.0.0.0:26657"/' /root/.nyks/config/config.toml
 
 WORKDIR /testnet
-#COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
-#RUN chmod +x /testnet/nyks_entrypoint.sh
+COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
+RUN chmod +x /testnet/nyks_entrypoint.sh
 
 RUN mkdir -p /testnet/data
 RUN cp -R /root/.nyks/* /testnet/data/
@@ -86,7 +86,7 @@ WORKDIR /testnet
 RUN git clone https://github.com/twilight-project/btc-oracle.git
 WORKDIR /testnet/btc-oracle
 RUN git fetch origin
-RUN git checkout develop
+RUN git checkout fragments
 RUN sed -i '9s|.*|github.com/btcsuite/btcd v0.22.1|' /testnet/nyks/go.mod
 RUN go mod tidy
 ENV CGO_ENABLED=0
@@ -95,23 +95,20 @@ RUN go build -o btcoracle
 WORKDIR /testnet/btc-oracle/configs
 RUN sed -i '2s|.*|"accountName": "validator-self",|' config.json
 RUN sed -i '4s|.*| "DB_host": "postgres_container",|' config.json
-RUN sed -i '8s|.*| "forkscanner_host": "forkscanner",|' config.json
+RUN sed -i '10s|.*| "forkscanner_host": "forkscanner",|' config.json
 # replace the nyksd_url and nyksd_socket_url with the ip address of the nyksd node
-RUN sed -i '11s|.*| "nyksd_url": "http://0.0.0.0:1317",|' config.json
-RUN sed -i '12s|.*| "nyksd_socket_url" : "ws://0.0.0.0:26657/websocket",|' config.json
+RUN sed -i '14s|.*| "nyksd_url": "http://0.0.0.0:1317",|' config.json
+RUN sed -i '15s|.*| "nyksd_socket_url" : "ws://0.0.0.0:26657/websocket",|' config.json
 # enable the validator
-RUN sed -i '13s|.*| "validator": true,|' config.json
+RUN sed -i '25s|.*| "validator": true,|' config.json
 # configure the btc-oracle as Judge
-#RUN sed -i '14s|.*| "running_mode": judge,|' config.json
+#RUN sed -i '23s|.*| "running_mode": judge,|' config.json
 WORKDIR /testnet
 COPY ./scripts/wait_for_it.sh /testnet/wait_for_it.sh
-#COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
+COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
 RUN chmod +x /testnet/wait_for_it.sh
-#RUN chmod +x /testnet/nyks_entrypoint.sh
+RUN chmod +x /testnet/nyks_entrypoint.sh
 RUN chmod +x /testnet/btc-oracle/btcoracle
-# set working directory to /testnet/nyks/release
-WORKDIR /testnet/nyks/release
-
 
 EXPOSE 1317
 EXPOSE 26656
