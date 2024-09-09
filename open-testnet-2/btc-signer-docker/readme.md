@@ -219,8 +219,9 @@ To build and run the `nyks` node and the `btc-oracle`, follow these steps:
     ```bash
     nyksd tx volt signer-application 1 1 1 03a34fa8b8371a6a14a2faec5e3e85b6d5f32f3c1603ad7a7b22d43aaabf47adad --from oracle-node --keyring-backend test --chain-id nyks    
     ```    
+10. Once, a fragment has all of the signers, We need to update the configuration file for the btc Oracle. Here is the [sample file](https://github.com/twilight-project/testnets/blob/main/open-testnet-2/required-files/sample_btcOracle_config.json) and the [explanation file](https://github.com/twilight-project/testnets/blob/main/open-testnet-2/required-files/btcOracle_json_explained.md).
 
-10. Start the `btc-oracle` once the `signer-application` is executed  
+11. Start the `btc-oracle` once the `signer-application` is executed  
     ```bash
       cd /testnet/btc-oracle
       ./testnet/btc-oracle/btcoracle
