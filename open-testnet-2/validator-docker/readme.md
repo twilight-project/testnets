@@ -115,13 +115,8 @@ goto the following folder
    ```bash
    nyksd tx volt accept-signers 1 1 --from validator-self --chain-id nyks --keyring-backend test
    ```    
-6. Once, a fragment has all of the signers, register a reserve for a fragment ID using:
-   ```bash
-   nyksd tx bridge register-reserve-address <fragmentId> <reserveScript> <reserveAddress> --from validator-self --chain-id nyks --keyring-backend test
-   ```
-   - `fragmentId` = The ID of the fragment signer wants to join.
-   - `reserveScript` = BTC reserve script.
-   - `reserveAddress` = BTC reserve address.
+6. Once, a fragment has all of the signers, We need to update the configuration file for the btc Oracle. Here is the [sample file]([url](https://github.com/twilight-project/testnets/blob/main/open-testnet-2/required-files/sample_btcOracle_config.json)) and the [explanation file]([url](https://github.com/twilight-project/testnets/blob/main/open-testnet-2/required-files/btcOracle_json_explained.md)).
+
 7. Start the `btc-oracle` once the `register-reserve-address` is executed  
    ```bash
    cd /testnet/btc-oracle
