@@ -56,17 +56,8 @@ To build and run the validator node, follow these steps:
 8. Show the canonical account address of the validator. 
    ```bash 
    nyksd keys show validator-self --keyring-backend test
-   ```
-9. Map the newly created validator in the chain to setup their `btcOracleAddress`, `btcPublicKey` and `validatorAddress` 
-   ```bash 
-   nyksd tx nyks set-delegate-addresses <validator_address> <account_address> <btcPublicKey> --from <validator-self> --chain-id nyks --keyring-backend test
    ``` 
-   where: 
-   - `validator_address` is the validator address of the new node.
-   - `account_address` is the canonical account address of the new node.
-   - `btcPublicKey` BTC public key associated with the validator. Forn the purposes of this testnet, any valid btcPublicKey can be used.   
-
-10. Start the `btc-oracle` once the `set-delegate-address` is executed  
+9. Start the `btc-oracle` once the `Run A Judge` setup is done. 
       ```bash
       cd /testnet/btc-oracle
       ./testnet/btc-oracle/btcoracle
