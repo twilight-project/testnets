@@ -1,5 +1,5 @@
 {
-    "accountName": "validator-lon", 
+    "accountName": "validator-lon",
     
     "DB_port": "5432",
     "DB_host": "localhost",
