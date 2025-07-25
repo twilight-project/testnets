@@ -48,22 +48,9 @@ RUN head -n 10 go.mod
 RUN USER=root ignite chain build --release
 WORKDIR /testnet/nyks/release
 RUN ls -a
-RUN tar -xf nyks_linux_arm64.tar.gz
+RUN ls -a
+RUN tar -xf nyks_linux**
 ENV PATH="/testnet/nyks/release:${PATH}"
-
-# initialize the nyks chain node 
-RUN nyksd init validator-self --chain-id nyks
-# create a add a key named validator-self  to the node
-RUN nyksd keys add validator-self --keyring-backend test
-
-# ========================================================================================
-# for new chain setup or new single node setup
-# add genesis account and generate genesis transaction
-RUN ./nyksd add-genesis-account validator-self 10000000000000nyks --keyring-backend test
-RUN ./nyksd gentx validator-self 100000000000nyks --chain-id nyks --keyring-backend test 
-RUN ./nyksd collect-gentxs
-# update the genesis.json file to change the stake to nyks
-RUN sed -i 's/stake/nyks/g' /root/.nyks/config/genesis.json
 # ========================================================================================
 
 # ========================================================================================
@@ -73,35 +60,37 @@ RUN sed -i 's/stake/nyks/g' /root/.nyks/config/genesis.json
 # RUN sed -i 's/persistent_peers = ""/persistent_peers = "cfac2e24742cc7ad3f972c0c9e0228d051abd034@64.23.150.96:26656"/' /root/.nyks/config/config.toml
 # ========================================================================================
 
-RUN sed -i '11s/.*/minimum-gas-prices = "0nyks"/' /root/.nyks/config/app.toml
-RUN sed -i '129s/.*/enabled-unsafe-cors = true/' /root/.nyks/config/app.toml
-RUN sed -i '108s/.*/enable = true/' /root/.nyks/config/app.toml
-RUN sed -i '96s/.*/cors_allowed_origins = ["*"]/' /root/.nyks/config/config.toml
-RUN sed -i '91s/.*/laddr = "tcp:\/\/0.0.0.0:26657"/' /root/.nyks/config/config.toml
-
 WORKDIR /testnet
 COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
 COPY ./scripts/bootstrap.sh /testnet/bootstrap.sh
 RUN chmod +x /testnet/nyks_entrypoint.sh
 RUN chmod +x /testnet/bootstrap.sh
 
-RUN git clone https://github.com/twilight-project/zkoracle-go.git
+# COPY ./nyks/zkoracle-go /testnet/zkoracle-go
+RUN git clone -b fix-mod https://github.com/twilight-project/zkoracle-go.git
 WORKDIR /testnet/zkoracle-go
-RUN git fetch origin
+# RUN git fetch origin
 RUN go mod tidy
-
-WORKDIR /testnet/zkoracle-go/configs
+RUN CGO_ENABLED=0 go build .
+RUN ls -a
+WORKDIR /testnet/zkoracle-go/config
+RUN ls -a
 RUN sed -i '2s|.*|"accountName": "validator-self",|' config.json
 RUN sed -i '2s|.*| "nyks_url": "0.0.0.0:1317"|' config.json
 # configure the btc-oracle as Judge
 
 WORKDIR /testnet
+RUN ls -a
+RUN ls -a
 COPY ./scripts/wait_for_it.sh /testnet/wait_for_it.sh
 COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
+COPY ./scripts/bootstrap.sh /testnet/bootstrap.sh
+COPY ./scripts/pre_bootstrap.sh /testnet/pre_bootstrap.sh
 RUN chmod +x /testnet/wait_for_it.sh
 RUN chmod +x /testnet/nyks_entrypoint.sh
 RUN chmod +x /testnet/zkoracle-go/zkoracle-go
 RUN chmod +x /testnet/bootstrap.sh
+RUN chmod +x /testnet/pre_bootstrap.sh
 
 EXPOSE 1317
 EXPOSE 26656
