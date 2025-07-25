@@ -29,6 +29,7 @@ RUN ignite version
 RUN git config --global http.postBuffer 524288000
 # clone cosmos-sdk v45.3
 RUN git clone https://github.com/twilight-project/cosmos-sdk.git
+
 WORKDIR /testnet/cosmos-sdk
 RUN git fetch origin
 RUN git checkout twilightv453
@@ -46,9 +47,8 @@ RUN sed -i '/toolchain/d' go.mod
 RUN head -n 10 go.mod 
 # build nyks chain node binary
 RUN USER=root ignite chain build --release
+
 WORKDIR /testnet/nyks/release
-RUN ls -a
-RUN ls -a
 RUN tar -xf nyks_linux**
 ENV PATH="/testnet/nyks/release:${PATH}"
 # ========================================================================================
@@ -61,27 +61,40 @@ ENV PATH="/testnet/nyks/release:${PATH}"
 # ========================================================================================
 
 WORKDIR /testnet
-COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
-COPY ./scripts/bootstrap.sh /testnet/bootstrap.sh
-RUN chmod +x /testnet/nyks_entrypoint.sh
-RUN chmod +x /testnet/bootstrap.sh
-
-# COPY ./nyks/zkoracle-go /testnet/zkoracle-go
 RUN git clone -b fix-mod https://github.com/twilight-project/zkoracle-go.git
 WORKDIR /testnet/zkoracle-go
 # RUN git fetch origin
 RUN go mod tidy
 RUN CGO_ENABLED=0 go build .
-RUN ls -a
+
 WORKDIR /testnet/zkoracle-go/config
-RUN ls -a
-RUN sed -i '2s|.*|"accountName": "validator-self",|' config.json
-RUN sed -i '2s|.*| "nyks_url": "0.0.0.0:1317"|' config.json
+# RUN sed -i '2s|.*|"accountName": "validator-self",|' config.json
+# RUN sed -i '2s|.*| "nyks_url": "0.0.0.0:1317"|' config.json
+# Replace the value of accountName
+RUN sed -i 's|"accountName": *"[^"]*"|"accountName": "validator-self"|' config.json
+
+# Replace the value of nyks_url
+RUN sed -i 's|"nyks_url": *"[^"]*"|"nyks_url": "http://0.0.0.0:1317"|' config.json
+RUN cat config.json
 # configure the btc-oracle as Judge
 
+
+# build the faucet server
+# ========================================================================================
+
 WORKDIR /testnet
-RUN ls -a
-RUN ls -a
+
+COPY ./nyks/btcDepositConfirmer/ /testnet/btcDepositConfirmer/
+WORKDIR /testnet/btcDepositConfirmer
+
+RUN go mod tidy
+RUN CGO_ENABLED=0 go build .
+
+RUN chmod +x /testnet/btcDepositConfirmer/depositconfirmer
+
+
+
+WORKDIR /testnet
 COPY ./scripts/wait_for_it.sh /testnet/wait_for_it.sh
 COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
 COPY ./scripts/bootstrap.sh /testnet/bootstrap.sh
@@ -96,3 +109,5 @@ EXPOSE 1317
 EXPOSE 26656
 EXPOSE 26657
 EXPOSE 26660
+EXPOSE 7000
+EXPOSE 6969

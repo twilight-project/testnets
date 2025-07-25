@@ -1,27 +1,87 @@
 version: '3.1'
 
 services:
-    nyks:
-        container_name: "nyks"
-        build:
-          context: ./
-          dockerfile: ./nyks/Dockerfile
-        ports:
-            - "1317:1317"
-            - "26656:26656"
-            - "26657:26657"
-            - "26660:26660"
-        expose:
-            - "1317"
-            - "26656"
-            - "26657"
-            - "26660"
-        volumes:
-            - ./nyks/data:/root/.nyks
-        # command : ["./wait_for_it.sh", "postgres:5432", "--", "./nyks_entrypoint.sh"]
-        command: ["./nyks_entrypoint.sh"]
-        networks:
-            - network_conn
-        
+  nyks:
+    container_name: "nyks"
+    build:
+      context: ./
+      dockerfile: ./nyks/Dockerfile
+    ports:
+      - "1317:1317"
+      - "26656:26656"
+      - "26657:26657"
+      - "26660:26660"
+      - "7000:7000"
+      - "6969:6969"
+    expose:
+      - "1317"
+      - "26656"
+      - "26657"
+      - "26660"
+      - "7000"
+      - "6969"
+    volumes:
+      - ./nyks/data:/root/.nyks
+    command: [ "./nyks_entrypoint.sh" ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:26657/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - network_conn
+
+  zkos_database:
+    image: docker.io/bitnami/postgresql:17.5.0
+    container_name: zkos_database
+    hostname: zkos_database
+    restart: always
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=repl_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+      - POSTGRESQL_USERNAME=postgres
+      - POSTGRESQL_PASSWORD=postgres_zkoracle
+      - POSTGRESQL_DATABASE=zkoracle_db
+      - ALLOW_EMPTY_PASSWORD=NO
+    ports:
+      - "5433:5432"
+    volumes:
+      - zkos_database-data:/bitnami/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d zkoracle_db -U postgres" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - network_conn
+
+  zkos:
+    build:
+      context: ./zkos
+      dockerfile: Dockerfile
+    hostname: zkos
+    restart: always
+    depends_on:
+      zkos_database:
+        condition: service_healthy
+      nyks:
+        condition: service_healthy
+    ports:
+      - "3030:3030"
+      - "2500:2500"
+    volumes:
+      - ./zkos/data/:/home/zkos/
+      - ./zkos/zkos.env:/home/zkos/.env
+    container_name: zkos
+    networks:
+      - network_conn
+
 networks:
   network_conn:
+
+
+volumes:
+  zkos_database-data:
+    driver: local

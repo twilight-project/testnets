@@ -1,0 +1,30 @@
+#############################
+# Build stage for zkos
+#############################
+FROM rust:1.87.0 as builder-zkos
+RUN USER=root apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
+    apt-get -y install software-properties-common && \
+    apt-get update
+
+RUN ls -a
+RUN ls -a
+RUN git clone -b refactor/transactionapi https://github.com/twilight-project/zkos-rust.git
+WORKDIR /zkos-rust
+
+RUN cargo build --release 
+
+#############################
+# Runtime stage
+#############################
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates protobuf-compiler jq && \
+    rm -rf /var/lib/apt/lists/*
+EXPOSE 3030
+EXPOSE 2500
+RUN useradd -m zkos
+WORKDIR /home/zkos
+COPY --from=builder-zkos ./zkos-rust/target/release/api_server /usr/local/bin/api_server
+
+ENTRYPOINT ["api_server"]

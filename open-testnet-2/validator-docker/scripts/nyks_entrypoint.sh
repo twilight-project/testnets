@@ -1,11 +1,31 @@
 #!/bin/bash
-# This script is the entrypoint for the nyksd container.
-# It copies the testnet data to the nyksd data directory and starts the nyksd daemon.
-# cp -Rv /testnet/data/* /root/.nyks/
-./pre_bootstrap.sh
+set -e
+
+# Run pre_bootstrap.sh only once
+if [ ! -f "/root/.nyks/prebootstrap_done" ]; then
+    echo "Running pre_bootstrap.sh for the first time..."
+    ./pre_bootstrap.sh
+    touch /root/.nyks/prebootstrap_done
+else
+    echo "pre_bootstrap.sh already completed. Skipping..."
+fi
+
+# Start nyksd and wait
 nyksd start &
 sleep 15
-./bootstrap.sh
-cd /testnet/zkoracle-go
-./zkoracle-go
 
+# Run bootstrap.sh only once
+if [ ! -f "/root/.nyks/bootstrap_done" ]; then
+    echo "Running bootstrap.sh for the first time..."
+    ./bootstrap.sh
+    touch /root/.nyks/bootstrap_done
+else
+    echo "bootstrap.sh already completed. Skipping..."
+fi
+echo "Starting zkoracle-go"
+cd /testnet/zkoracle-go
+exec ./zkoracle-go &
+
+echo "Starting btcDepositConfirmer"
+cd /testnet/btcDepositConfirmer
+exec ./depositconfirmer
