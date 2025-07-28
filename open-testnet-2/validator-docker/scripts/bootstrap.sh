@@ -11,19 +11,19 @@ sleep 5
 echo "Adding signers"
 echo "Adding signer1"
 nyksd keys add signer1 --keyring-backend test
-sleep 1
+sleep 2
 echo "Adding signer2"
 nyksd keys add signer2 --keyring-backend test
-sleep 1
+sleep 2
 echo "Adding signer3"
 nyksd keys add signer3 --keyring-backend test
-sleep 1
+sleep 2
 echo "Adding signer4"
 nyksd keys add signer4 --keyring-backend test
-sleep 1
+sleep 2
 echo "Adding signer5"
 nyksd keys add signer5 --keyring-backend test
-sleep 1
+sleep 2
 echo "Adding signer6"
 nyksd keys add signer6 --keyring-backend test
 sleep 3
@@ -31,19 +31,19 @@ sleep 3
 echo "Sending funds to signers"
 echo "Sending funds to signer1"
 nyksd tx bank send $(nyksd keys show validator-self -a --keyring-backend test) $(nyksd keys show signer1 -a --keyring-backend test) 1000nyks --keyring-backend test -y
-sleep 4
+sleep 5
 echo "Sending funds to signer2"
 nyksd tx bank send $(nyksd keys show validator-self -a --keyring-backend test) $(nyksd keys show signer2 -a --keyring-backend test) 1000nyks --keyring-backend test -y
-sleep 4
+sleep 5
 echo "Sending funds to signer3"
 nyksd tx bank send $(nyksd keys show validator-self -a --keyring-backend test) $(nyksd keys show signer3 -a --keyring-backend test) 1000nyks --keyring-backend test -y
-sleep 4
+sleep 5
 echo "Sending funds to signer4"
 nyksd tx bank send $(nyksd keys show validator-self -a --keyring-backend test) $(nyksd keys show signer4 -a --keyring-backend test) 1000nyks --keyring-backend test -y
-sleep 4
+sleep 5
 echo "Sending funds to signer5"
 nyksd tx bank send $(nyksd keys show validator-self -a --keyring-backend test) $(nyksd keys show signer5 -a --keyring-backend test) 1000nyks --keyring-backend test -y
-sleep 4
+sleep 5
 echo "Sending funds to signer6"
 nyksd tx bank send $(nyksd keys show validator-self -a --keyring-backend test) $(nyksd keys show signer6 -a --keyring-backend test) 1000nyks --keyring-backend test -y
 sleep 5
