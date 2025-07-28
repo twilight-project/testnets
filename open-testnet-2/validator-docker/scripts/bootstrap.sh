@@ -102,5 +102,5 @@ echo "Registering deposit address for faucet"
 nyksd tx bridge register-deposit-address 1BY1odPsGFFhQZCcc7M6V4w2v4kaVHFTgp 100000000000000 1000 --from faucet --chain-id nyks --keyring-backend test -y
 sleep 5
 echo "Confirming deposit for faucet"
-nyksd tx bridge msg-confirm-btc-deposit 14uEN8abvKA1zgYCpv8MWCUwAMLGBqdZGM 100000000000000 10000 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f $(nyksd keys show faucet -a --keyring-backend test) twilight1k5knhhd6p9zxxwug77aqgrayvyt8yh6nw8ca7h --from validator-self --chain-id nyks --keyring-backend test -y
+nyksd tx bridge msg-confirm-btc-deposit 14uEN8abvKA1zgYCpv8MWCUwAMLGBqdZGM 100000000000000 10000 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f $(nyksd keys show faucet -a --keyring-backend test) $(nyksd keys show validator-self -a --keyring-backend test) --from validator-self --chain-id nyks --keyring-backend test -y
 sleep 2

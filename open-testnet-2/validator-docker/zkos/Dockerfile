@@ -12,7 +12,7 @@ RUN ls -a
 RUN ls -a
 RUN git clone -b refactor/transactionapi https://github.com/twilight-project/zkos-rust.git
 WORKDIR /zkos-rust
-
+# RUN sed -i 's|http://0\.0\.0\.0:7000|http://nyks:7000|g' transactionapi/src/rpcserver/service.rs
 RUN cargo build --release 
 
 #############################

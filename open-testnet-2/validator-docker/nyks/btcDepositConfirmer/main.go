@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"os/exec"
 
 	"github.com/rs/cors"
@@ -42,14 +41,14 @@ func runBTCDepositConfirmation(recipientAddress string) error {
 		"nyksd", "tx", "bridge", "msg-confirm-btc-deposit", "14uEN8abvKA1zgYCpv8MWCUwAMLGBqdZGM", "50000", "50000",
 		tx_id,
 		recipientAddress,
-		"twilight1k5knhhd6p9zxxwug77aqgrayvyt8yh6nw8ca7h",
-		"--from",             "validator-sfo",
+		"twilight14ddyy5rqpycrmpk6spn9zy5attqpqzezp6cf2a",
+		"--from",             "validator-self",
                 "--chain-id",         "nyks",
                 "--keyring-backend",  "test",
                 "--yes",
 	)
 	 // 2. Force the right HOME so nyksd sees your test keyring
-        cmd.Env = append(os.Environ(),"HOME=/home/ubuntu",)
+        // cmd.Env = append(os.Environ(),"HOME=${HOME}",)
 
 	// Run the command and capture output
 	output, err := cmd.CombinedOutput()
@@ -71,14 +70,14 @@ func runBTCDepositConfirmationRelayerWallet(recipientAddress string) error {
 		"nyksd", "tx", "bridge", "msg-confirm-btc-deposit", "14uEN8abvKA1zgYCpv8MWCUwAMLGBqdZGM", "500000000", "50000",
 		tx_id,
 		recipientAddress,
-		"twilight1k5knhhd6p9zxxwug77aqgrayvyt8yh6nw8ca7h",
-		"--from",             "validator-sfo",
+		"twilight14ddyy5rqpycrmpk6spn9zy5attqpqzezp6cf2a",
+		"--from",             "validator-self",
                 "--chain-id",         "nyks",
                 "--keyring-backend",  "test",
                 "--yes",
 	)
 	 // 2. Force the right HOME so nyksd sees your test keyring
-        cmd.Env = append(os.Environ(),"HOME=/home/ubuntu",)
+        // cmd.Env = append(os.Environ(),"HOME=${HOME}",)
 
 	// Run the command and capture output
 	output, err := cmd.CombinedOutput()
@@ -102,7 +101,7 @@ func runBankSendCommand(toAddress string) error {
                "--yes", 
 	)
 	// 2. Force the right HOME so nyksd sees your test keyring
-    	cmd.Env = append(os.Environ(),"HOME=/home/ubuntu",)
+    	// cmd.Env = append(os.Environ(),"HOME=${HOME}",)
 	// Run the command and capture output
 	output, err := cmd.CombinedOutput()
 	if err != nil {

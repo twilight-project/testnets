@@ -63,13 +63,10 @@ ENV PATH="/testnet/nyks/release:${PATH}"
 WORKDIR /testnet
 RUN git clone -b fix-mod https://github.com/twilight-project/zkoracle-go.git
 WORKDIR /testnet/zkoracle-go
-# RUN git fetch origin
+RUN sed -i 's|filepath.Join("/home/ubuntu/.nyks")|filepath.Join("/root/.nyks")|' submitTx.go
 RUN go mod tidy
 RUN CGO_ENABLED=0 go build .
-
 WORKDIR /testnet/zkoracle-go/config
-# RUN sed -i '2s|.*|"accountName": "validator-self",|' config.json
-# RUN sed -i '2s|.*| "nyks_url": "0.0.0.0:1317"|' config.json
 # Replace the value of accountName
 RUN sed -i 's|"accountName": *"[^"]*"|"accountName": "validator-self"|' config.json
 

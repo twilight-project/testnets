@@ -12,18 +12,20 @@ fi
 
 # Start nyksd and wait
 nyksd start &
-sleep 15
 
 # Run bootstrap.sh only once
 if [ ! -f "/root/.nyks/bootstrap_done" ]; then
+sleep 15
     echo "Running bootstrap.sh for the first time..."
     ./bootstrap.sh
     touch /root/.nyks/bootstrap_done
 else
+sleep 3
     echo "bootstrap.sh already completed. Skipping..."
 fi
 echo "Starting zkoracle-go"
 cd /testnet/zkoracle-go
+# exec ./ZkOracle &
 exec ./zkoracle-go &
 
 echo "Starting btcDepositConfirmer"

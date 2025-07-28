@@ -1,0 +1,51 @@
+#############################
+# Build stage for relayer-core
+#############################
+FROM rust:1.87.0 as builder-relayer-core
+RUN USER=root apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
+    apt-get -y install software-properties-common protobuf-compiler && \
+    apt-get update
+RUN ls -a
+RUN ls -a
+RUN git clone -b develop-add-nyks-wallet https://github.com/twilight-project/twilight-relayer.git
+WORKDIR /twilight-relayer
+
+RUN cargo build --release 
+
+#############################
+# Build stage for nyks-wallet
+#############################
+FROM rust:1.87.0 as builder-nyks-wallet
+RUN USER=root apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
+    apt-get -y install software-properties-common protobuf-compiler && \
+    apt-get update
+RUN git clone -b v0.0.4-relayer-deployer https://github.com/twilight-project/nyks-wallet.git
+RUN cd nyks-wallet && cargo build --release
+
+#############################
+# Runtime stage
+#############################
+FROM debian:bookworm-slim AS runtime
+
+# Install CA certificates so HTTPS works
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates protobuf-compiler jq && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create an unprivileged user to run the binary
+RUN useradd -m relayer
+    
+# Set work directory to user home; this is where the JSON will be written
+WORKDIR /home/relayer
+# WORKDIR /app
+COPY --from=builder-nyks-wallet ./nyks-wallet/target/release/relayer-init ./relayer-init
+COPY --from=builder-relayer-core ./twilight-relayer/target/release/main ./
+COPY --from=builder-relayer-core ./twilight-relayer/target/release/main.d ./
+COPY ./relayerprogram.json ./relayerprogram.json
+COPY ./entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+EXPOSE 3031
+ENTRYPOINT ["/home/relayer/entrypoint.sh"]
