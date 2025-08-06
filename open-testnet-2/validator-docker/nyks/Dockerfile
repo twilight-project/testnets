@@ -1,110 +1,82 @@
-FROM ubuntu:22.04 as base
-# get and install necessary sysytem packages
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    unzip \
-    wget \
-    vim \
-    telnet
+###############################################################################
+# ── Stage 1 ─────────────────────────── Builder ───────────────────────────── #
+###############################################################################
+# Uses full Ubuntu because we need build-essentials, git, Ignite, etc.
+FROM ubuntu:22.04 AS builder
 
-# update the package repository and install essestial build packages
-RUN apt update && \
-    apt-get install -y \
-    build-essential \
-    ca-certificates
+ARG GO_VERSION=1.22.2
+ARG IGNITE_VERSION=v0.26.1
+ENV DEBIAN_FRONTEND=noninteractive
 
-# setup woekdir and install go and ignite
-WORKDIR /testnet
-RUN curl -OL https://golang.org/dl/go1.22.2.linux-amd64.tar.gz
-RUN tar -C /usr/local -xvf go1.22.2.linux-amd64.tar.gz
+# 1) OS packages (single layer; cleans cache afterwards)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl git unzip wget ca-certificates build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2) Go tool-chain
+RUN curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz \
+    | tar -C /usr/local -xz
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-WORKDIR /testnet
+# 3) Ignite CLI
 RUN mkdir -p /root
-RUN curl https://get.ignite.com/cli@v0.26.1! | bash
-RUN ignite version
+RUN curl -s "https://get.ignite.com/cli@${IGNITE_VERSION}!" | bash
 
+WORKDIR /build
 
-RUN git config --global http.postBuffer 524288000
-# clone cosmos-sdk v45.3
-RUN git clone https://github.com/twilight-project/cosmos-sdk.git
+# 4) Get nyks + its forked Cosmos SDK
+RUN git clone --branch twilightv453 \
+    https://github.com/twilight-project/cosmos-sdk.git
 
-WORKDIR /testnet/cosmos-sdk
-RUN git fetch origin
-RUN git checkout twilightv453
+RUN git clone --branch clearingv03 \
+    https://github.com/twilight-project/nyks.git
 
-WORKDIR /testnet
-# clone nyks chain node source code
-RUN git clone https://github.com/twilight-project/nyks.git
-WORKDIR /testnet/nyks
-RUN git fetch origin
-RUN git checkout clearingv03
-RUN go mod tidy
-RUN echo "Contents of go.mod after modification (first 10 lines):" && head -n 10 go.mod 
+WORKDIR /build/nyks
+# tidy & remove toolchain stanza
+RUN go mod tidy && sed -i '/toolchain/d' go.mod
 
-RUN sed -i '/toolchain/d' go.mod 
-RUN head -n 10 go.mod 
-# build nyks chain node binary
+# 5) Build nyksd (static binary inside release tar)
 RUN USER=root ignite chain build --release
-
-WORKDIR /testnet/nyks/release
+WORKDIR /build/nyks/release
 RUN tar -xf nyks_linux**
-ENV PATH="/testnet/nyks/release:${PATH}"
-# ========================================================================================
 
-# ========================================================================================
-# for joining existing chain
+# 6) Build deposit-confirmer
+WORKDIR /build
+COPY ./nyks/btcDepositConfirmer ./btcDepositConfirmer
+WORKDIR /build/btcDepositConfirmer
+RUN go mod download
+RUN CGO_ENABLED=0 go build -o /usr/local/bin/depositconfirmer .
 
-# COPY ./nyks/genesis.json /root/.nyks/config/genesis.json
-# RUN sed -i 's/persistent_peers = ""/persistent_peers = "cfac2e24742cc7ad3f972c0c9e0228d051abd034@64.23.150.96:26656"/' /root/.nyks/config/config.toml
-# ========================================================================================
+###############################################################################
+# ── Stage 2 ─────────────────────────── Runner ────────────────────────────── #
+###############################################################################
+FROM debian:bookworm-slim AS runner         
+LABEL org.opencontainers.image.source="https://github.com/twilight-project/nyks-docker"
 
-# WORKDIR /testnet
-# RUN git clone -b fix-mod https://github.com/twilight-project/zkoracle-go.git
-# WORKDIR /testnet/zkoracle-go
-# RUN sed -i 's|filepath.Join("/home/ubuntu/.nyks")|filepath.Join("/root/.nyks")|' submitTx.go
-# RUN go mod tidy
-# RUN CGO_ENABLED=0 go build .
-# WORKDIR /testnet/zkoracle-go/config
-# # Replace the value of accountName
-# RUN sed -i 's|"accountName": *"[^"]*"|"accountName": "validator-self"|' config.json
+# runtime utils: bash (scripts), curl (health), ca-certificates (TLS)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends bash curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# # Replace the value of nyks_url
-# RUN sed -i 's|"nyks_url": *"[^"]*"|"nyks_url": "http://0.0.0.0:1317"|' config.json
-# RUN cat config.json
-# # configure the btc-oracle as Judge
+# 1) copy the two statically-linked binaries
+COPY --from=builder /build/nyks/release/nyksd /usr/local/bin/nyksd
+COPY --from=builder /usr/local/bin/depositconfirmer /usr/local/bin/depositconfirmer
 
+# 2) copy entry scripts
+COPY ./scripts/nyks_entrypoint.sh  /usr/local/bin/
+COPY ./scripts/pre_bootstrap.sh    /usr/local/bin/
+COPY ./scripts/bootstrap.sh        /usr/local/bin/
+COPY ./scripts/wait_for_it.sh      /usr/local/bin/
+RUN chmod +x /usr/local/bin/nyks_entrypoint.sh \
+    /usr/local/bin/pre_bootstrap.sh \
+    /usr/local/bin/bootstrap.sh \
+    /usr/local/bin/wait_for_it.sh
 
-# build the faucet server
-# ========================================================================================
+# 3) working directory for scripts & volume for chain data
+WORKDIR /root
+VOLUME ["/root/.nyks"]
 
-WORKDIR /testnet
+EXPOSE 1317 26656 26657 26660 6969
 
-COPY ./nyks/btcDepositConfirmer/ /testnet/btcDepositConfirmer/
-WORKDIR /testnet/btcDepositConfirmer
-
-RUN go mod tidy
-RUN CGO_ENABLED=0 go build .
-
-RUN chmod +x /testnet/btcDepositConfirmer/depositconfirmer
-
-
-
-WORKDIR /testnet
-COPY ./scripts/wait_for_it.sh /testnet/wait_for_it.sh
-COPY ./scripts/nyks_entrypoint.sh /testnet/nyks_entrypoint.sh
-COPY ./scripts/bootstrap.sh /testnet/bootstrap.sh
-COPY ./scripts/pre_bootstrap.sh /testnet/pre_bootstrap.sh
-RUN chmod +x /testnet/wait_for_it.sh
-RUN chmod +x /testnet/nyks_entrypoint.sh
-# RUN chmod +x /testnet/zkoracle-go/zkoracle-go
-RUN chmod +x /testnet/bootstrap.sh
-RUN chmod +x /testnet/pre_bootstrap.sh
-
-EXPOSE 1317
-EXPOSE 26656
-EXPOSE 26657
-EXPOSE 26660
-# EXPOSE 7000
-EXPOSE 6969
+ENTRYPOINT ["nyks_entrypoint.sh"]
