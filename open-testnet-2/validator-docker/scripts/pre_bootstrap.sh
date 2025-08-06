@@ -1,6 +1,7 @@
 nyksd init validator-self --chain-id nyks
 # Create and add a key named validator-self to the node
-nyksd keys add validator-self --keyring-backend test > tmp.log 2>&1 && grep -iE '^[a-z]{3,}( [a-z]{3,}){11,}' tmp.log > validator-self.mnemonic && cat validator-self.mnemonic
+cd ..
+nyksd keys add validator-self --keyring-backend test > tmp.log 2>&1 && grep -iE '^[a-z]{3,}( [a-z]{3,}){11,}' tmp.log > ./root/secrets/validator-self.mnemonic && cat ./root/secrets/validator-self.mnemonic
 
 # Add genesis account and generate genesis transaction
 nyksd add-genesis-account validator-self 10000000000000nyks --keyring-backend test

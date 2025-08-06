@@ -20,12 +20,16 @@ services:
       - "6969"
     volumes:
       - ./nyks/data:/root/.nyks
+      - nyks-secrets:/root/secrets/
     command: [ "./nyks_entrypoint.sh" ]
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:26657/status" ]
-      interval: 10s
+      # test: [ "CMD", "curl", "-f", "http://localhost:26657/status" ]
+      test: ["CMD-SHELL",
+         "curl -sf http://localhost:26657/status >/dev/null && \
+          bash -c 'exec 3<>/dev/tcp/localhost/6969'"]
+      interval: 15s
       timeout: 5s
-      retries: 5
+      retries: 20
       start_period: 30s
     networks:
       - network_conn
@@ -72,7 +76,7 @@ services:
     volumes:
       - ./zkos/data/:/home/zkos/
       - ./zkos/zkos.env:/home/zkos/.env
-      - ./zkos/validator-self.mnemonic:/home/zkos/validator-self.mnemonic
+      - nyks-secrets:/home/zkos/secrets/
     container_name: zkos
     networks:
       - network_conn
@@ -83,4 +87,6 @@ networks:
 
 volumes:
   zkos_database-data:
+    driver: local
+  nyks-secrets:
     driver: local
