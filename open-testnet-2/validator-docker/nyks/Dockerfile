@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y \
 # update the package repository and install essestial build packages
 RUN apt update && \
     apt-get install -y \
-        build-essential \
-        ca-certificates
+    build-essential \
+    ca-certificates
 
 # setup woekdir and install go and ignite
 WORKDIR /testnet
@@ -60,20 +60,20 @@ ENV PATH="/testnet/nyks/release:${PATH}"
 # RUN sed -i 's/persistent_peers = ""/persistent_peers = "cfac2e24742cc7ad3f972c0c9e0228d051abd034@64.23.150.96:26656"/' /root/.nyks/config/config.toml
 # ========================================================================================
 
-WORKDIR /testnet
-RUN git clone -b fix-mod https://github.com/twilight-project/zkoracle-go.git
-WORKDIR /testnet/zkoracle-go
-RUN sed -i 's|filepath.Join("/home/ubuntu/.nyks")|filepath.Join("/root/.nyks")|' submitTx.go
-RUN go mod tidy
-RUN CGO_ENABLED=0 go build .
-WORKDIR /testnet/zkoracle-go/config
-# Replace the value of accountName
-RUN sed -i 's|"accountName": *"[^"]*"|"accountName": "validator-self"|' config.json
+# WORKDIR /testnet
+# RUN git clone -b fix-mod https://github.com/twilight-project/zkoracle-go.git
+# WORKDIR /testnet/zkoracle-go
+# RUN sed -i 's|filepath.Join("/home/ubuntu/.nyks")|filepath.Join("/root/.nyks")|' submitTx.go
+# RUN go mod tidy
+# RUN CGO_ENABLED=0 go build .
+# WORKDIR /testnet/zkoracle-go/config
+# # Replace the value of accountName
+# RUN sed -i 's|"accountName": *"[^"]*"|"accountName": "validator-self"|' config.json
 
-# Replace the value of nyks_url
-RUN sed -i 's|"nyks_url": *"[^"]*"|"nyks_url": "http://0.0.0.0:1317"|' config.json
-RUN cat config.json
-# configure the btc-oracle as Judge
+# # Replace the value of nyks_url
+# RUN sed -i 's|"nyks_url": *"[^"]*"|"nyks_url": "http://0.0.0.0:1317"|' config.json
+# RUN cat config.json
+# # configure the btc-oracle as Judge
 
 
 # build the faucet server
@@ -98,7 +98,7 @@ COPY ./scripts/bootstrap.sh /testnet/bootstrap.sh
 COPY ./scripts/pre_bootstrap.sh /testnet/pre_bootstrap.sh
 RUN chmod +x /testnet/wait_for_it.sh
 RUN chmod +x /testnet/nyks_entrypoint.sh
-RUN chmod +x /testnet/zkoracle-go/zkoracle-go
+# RUN chmod +x /testnet/zkoracle-go/zkoracle-go
 RUN chmod +x /testnet/bootstrap.sh
 RUN chmod +x /testnet/pre_bootstrap.sh
 
@@ -106,5 +106,5 @@ EXPOSE 1317
 EXPOSE 26656
 EXPOSE 26657
 EXPOSE 26660
-EXPOSE 7000
+# EXPOSE 7000
 EXPOSE 6969

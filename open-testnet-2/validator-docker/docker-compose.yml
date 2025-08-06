@@ -11,14 +11,12 @@ services:
       - "26656:26656"
       - "26657:26657"
       - "26660:26660"
-      - "7000:7000"
       - "6969:6969"
     expose:
       - "1317"
       - "26656"
       - "26657"
       - "26660"
-      - "7000"
       - "6969"
     volumes:
       - ./nyks/data:/root/.nyks
@@ -74,6 +72,7 @@ services:
     volumes:
       - ./zkos/data/:/home/zkos/
       - ./zkos/zkos.env:/home/zkos/.env
+      - ./zkos/validator-self.mnemonic:/home/zkos/validator-self.mnemonic
     container_name: zkos
     networks:
       - network_conn

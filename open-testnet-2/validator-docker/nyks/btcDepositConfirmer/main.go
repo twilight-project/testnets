@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"strings"
 
 	"github.com/rs/cors"
 )
@@ -32,6 +33,14 @@ func generateRandomHash() (string, error) {
 
 // runBTCDepositConfirmation runs the specified command with the provided parameters.
 func runBTCDepositConfirmation(recipientAddress string) error {
+	addrBytes, err := exec.Command(
+		"nyksd", "keys", "show", "validator-self",
+		"-a", "--keyring-backend", "test",
+	).Output()
+	if err != nil {
+		return fmt.Errorf("failed to get validator address: %w", err)
+	}
+	validatorAddr := strings.TrimSpace(string(addrBytes)) // remove trailing newline
 
 	tx_id, err := generateRandomHash()
 	if err != nil {
@@ -41,7 +50,7 @@ func runBTCDepositConfirmation(recipientAddress string) error {
 		"nyksd", "tx", "bridge", "msg-confirm-btc-deposit", "14uEN8abvKA1zgYCpv8MWCUwAMLGBqdZGM", "50000", "50000",
 		tx_id,
 		recipientAddress,
-		"twilight14ddyy5rqpycrmpk6spn9zy5attqpqzezp6cf2a",
+		validatorAddr,
 		"--from",             "validator-self",
                 "--chain-id",         "nyks",
                 "--keyring-backend",  "test",
@@ -61,6 +70,14 @@ func runBTCDepositConfirmation(recipientAddress string) error {
 }
 // runBTCDepositConfirmation runs the specified command with the provided parameters.
 func runBTCDepositConfirmationRelayerWallet(recipientAddress string) error {
+	addrBytes, err := exec.Command(
+		"nyksd", "keys", "show", "validator-self",
+		"-a", "--keyring-backend", "test",
+	).Output()
+	if err != nil {
+		return fmt.Errorf("failed to get validator address: %w", err)
+	}
+	validatorAddr := strings.TrimSpace(string(addrBytes)) // remove trailing newline
 
 	tx_id, err := generateRandomHash()
 	if err != nil {
@@ -70,7 +87,7 @@ func runBTCDepositConfirmationRelayerWallet(recipientAddress string) error {
 		"nyksd", "tx", "bridge", "msg-confirm-btc-deposit", "14uEN8abvKA1zgYCpv8MWCUwAMLGBqdZGM", "500000000", "50000",
 		tx_id,
 		recipientAddress,
-		"twilight14ddyy5rqpycrmpk6spn9zy5attqpqzezp6cf2a",
+		validatorAddr,
 		"--from",             "validator-self",
                 "--chain-id",         "nyks",
                 "--keyring-backend",  "test",

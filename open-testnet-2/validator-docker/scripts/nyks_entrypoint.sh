@@ -23,10 +23,10 @@ else
 sleep 3
     echo "bootstrap.sh already completed. Skipping..."
 fi
-echo "Starting zkoracle-go"
-cd /testnet/zkoracle-go
-# exec ./ZkOracle &
-exec ./zkoracle-go &
+# echo "Starting zkoracle-go"
+# cd /testnet/zkoracle-go
+# # exec ./ZkOracle &
+# exec ./zkoracle-go &
 
 echo "Starting btcDepositConfirmer"
 cd /testnet/btcDepositConfirmer
