@@ -83,7 +83,7 @@ services:
     hostname: relayer-core
     restart: always
     ports:
-      - "3031:3031"
+      - "3033:3031"
     depends_on:
       kafka:
         condition: service_healthy
@@ -96,7 +96,6 @@ services:
       - ./data/relayer-core/state:/home/relayer/state
       - ./data/relayer-core/logs:/home/relayer/logs
       - ./envs/relayer-core.env:/home/relayer/.env:rw
-
     container_name: relayer-core
 
   order-api-service:
@@ -121,6 +120,7 @@ services:
     image: redis:7.4-alpine
     hostname: redis-server
     container_name: redis-server
+    restart: always
     environment:
       - REDIS_PASSWORD=foobared
     command: >

@@ -33,6 +33,7 @@ services:
       start_period: 30s
     networks:
       - network_conn
+    restart: always
 
   zkos_database:
     image: docker.io/bitnami/postgresql:17.5.0
