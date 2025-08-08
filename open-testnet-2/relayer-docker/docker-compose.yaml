@@ -206,6 +206,12 @@ services:
     volumes:
       - ./data/data-api-auth/:/var/log/relayer-auth
       - ./envs/data-api.env:/app/.env
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s      
 
   api:
     build:
@@ -230,6 +236,12 @@ services:
     volumes:
       - ./data/data-api-api/:/var/log/relayer-api
       - ./envs/data-api.env:/app/.env
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   api-proxy:
     build:
@@ -241,7 +253,7 @@ services:
       auth:
         condition: service_started
       api:
-        condition: service_started
+        condition: service_healthy
       archiver:
         condition: service_healthy
       redis-server:

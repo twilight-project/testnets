@@ -2,7 +2,7 @@ FROM openresty/openresty:alpine-fat
 
 RUN apk update && \
 	apk add openssl
-
+RUN apk add --no-cache wget
 RUN luarocks install lua-resty-jwt && \
 	luarocks install lua-cjson
 
@@ -11,4 +11,8 @@ COPY ./conf.d /etc/nginx/conf.d
 COPY ./modules /usr/local/openresty/nginx
 COPY ./modules /usr/local/openresty/site/lualib
 
-CMD nginx -g "daemon off;"
+# CMD nginx -g "daemon off;"
+COPY ./authenticator-entrypoint.sh /usr/local/bin/authenticator-entrypoint.sh
+RUN chmod +x /usr/local/bin/authenticator-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/authenticator-entrypoint.sh"]
