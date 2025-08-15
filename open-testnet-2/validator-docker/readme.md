@@ -2,7 +2,8 @@
 
 # Validator Node setup
 
-This repository contains docker files necessary for setting-up and deploying the validator node. It can also be used to creata a new network of validators.  
+This repository contains docker files necessary for setting-up and deploying the validator node. It sets up a new testnet which include running NYKS validator node, Running ZKOS and running the faucet.
+Please keep in mind that this testnet relies on faucet for both Nyks and Btc (on NYKs chain) tokens. Hence we dont need to run the BTC oracle and BTC forkscanner for this testnet. So please ignore the any reference to BTC oracle and forkscanner in this document. 
 
 ## Architecture
 
@@ -10,20 +11,22 @@ This repository contains docker files necessary for setting-up and deploying the
 
 ## What's Included?
 - nyks 
-- btc-oracle (relayer between Bitcoin Mainnet and Nyks)
-- Forkscanner (monitors Bitcoin Mainnet for forks)
+- ZKOS
+- Faucet
 
 
 ## What's Not Included?
-- ZkOS or other VMs
+- BTC Oracle
+- BTC Forkscanner
 
 ## Docker Features
 
 The Twilight docker script performs the following tasks:
 
-- **nyks**: Builds and runs the Cosmos SDK full node and btc-oracle program.
-- **forkscanner**: Builds and runs the Forkscanner program. This system connects to 3 Twilight's hosted Bitcoin full nodes. If you prefer to use your own Bitcoin Core nodes, please update the [nodes_setup.sql](/open-testnet-2/validator-docker/forkscanner/nodes_setup.sql) file with the relevant details.
+- **nyks**: Builds and runs the Cosmos SDK full node.
+- **zkos**: Builds and runs ZKOS.
 - **Storage (Postgres)**: Creates a PostgreSQL container with a volume for persistent storage, sets up the necessary databases, and applies the required schemas.
+- **Faucet**: Deploys a faucet for testnet funds.
 
 
 ##  Run a Validator
@@ -41,78 +44,24 @@ To build and run the validator node, follow these steps:
 5. run the command
 
    ```bash
-   docker-compose up
+   docker compose up
    ```
    This command will create docker containers, clone required repositories, and then build and initialize the chain. 
 
-6. SSH into the `nyks` [docker](#ssh-connection-to-the-container) container.
+## Getting Validator address from the container (optional)
+
+1. SSH into the `nyks` [docker](#ssh-connection-to-the-container) container.
    ```bash
    cd /testnet/nyks/release
    ```
-7. Show the validator address. 
+2. Show the validator address. 
    ```bash 
    nyksd keys show validator-self --bech val --keyring-backend test
    ```
-8. Show the canonical account address of the validator. 
+3. Show the canonical account address of the validator. 
    ```bash 
    nyksd keys show validator-self --keyring-backend test
    ``` 
-9. Start the `btc-oracle` once the `Run A Judge` setup is done. 
-      ```bash
-      cd /testnet/btc-oracle
-      ./testnet/btc-oracle/btcoracle
-      ```
-## Run a Judge
-To build and run the validator node as Judge, follow these steps:
-
-1. Perform steps 1 - 9 of [run a Validator](#run-a-validator) to setup and deploy basic validator node.
-
-2. SSH into the nyks [docker](#ssh-connection-to-the-container) container.
-goto the following folder
-   ```bash
-   cd /testnet/nyks/release/
-   ``` 
-3. Register the Judge by initiating the fragment bootstrap process. 
-   ```bash
-   nyksd tx bridge bootstrap-fragment <judge_address><numOfSigners><threshold><signerApplicationFee><fragmentFeeBips><arbitraryData> --from validator-self --chain-id nyks --keyring-backend test
-   ```
-   where: 
-   - `judgeAddress` = Ordinary twilight account address.
-   - `numOfSigners` = A Fragment should have 6 signers.
-   - `threshold` = Multisig threshold, minimum 2 signers.
-   - `signerApplicationFee` = Fragment specified fee for signers to send applications, this is for spam      protection. If a Fragment owner doesn’t accept an application, that Fee is confiscated by the module.
-   - `fragmentFeeBips` = Specify how much fee a Fragment wants to charge out of deposits.
-   - `arbitraryData` = Any string Fragment owner want to publish.
-
-   Example command setting up a fragment of 6 signers with a threshold of 4. 
-   ```bash
-   nyksd tx bridge bootstrap-fragment $(nyksd keys show validator-self -a --keyring-backend test) 6 4 1 1 test --from validator-self --chain-id nyks --keyring-backend test
-   ```
-4. Query the fragment information by using: 
-   ```bash
-   nyksd q volt get_all_fragments
-   ```
-   Communicate your fragment ID to signers and ask them to send signer applications.
-
-5. Accept signer applications using:
-   ```bash
-   nyksd tx volt accept-signers <fragmentID> <signerApplicationIds> --from validator-self --chain-id nyks --keyring-backend test
-   ```
-   where: 
-   - `fragmentId` = The ID of the fragment signer wants to join.
-   - `signerApplicationIds` = Comma-separated list of signer application IDs.
-
-   example command accepting a signer for fragment ID = 1
-   ```bash
-   nyksd tx volt accept-signers 1 1 --from validator-self --chain-id nyks --keyring-backend test
-   ```    
-6. Once, a fragment has all of the signers, We need to update the configuration file for the btc Oracle. Here is the [sample file]([url](https://github.com/twilight-project/testnets/blob/main/open-testnet-2/required-files/sample_btcOracle_config.json)) and the [explanation file]([url](https://github.com/twilight-project/testnets/blob/main/open-testnet-2/required-files/btcOracle_json_explained.md)).
-
-7. Start the `btc-oracle` once the `register-reserve-address` is executed  
-   ```bash
-   cd /testnet/btc-oracle
-   ./testnet/btc-oracle/btcoracle
-   ```
 
 ### Processor Architecture
 The name of the `nyks` release executable file varies depending on the processor's architecture and the operating system. Please ensure that you update line 47 in the [nyks/Dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile) accordingly:
