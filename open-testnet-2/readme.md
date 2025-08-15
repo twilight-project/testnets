@@ -27,11 +27,11 @@ cd testnets/open-testnet-2
 ```
 2. Navigate to the desired Directory:
 - For validator node setup, navigate to [validator-docker](/open-testnet-2/validator-docker/) .
-- For BTC signer node setup, navigate to [btc-signer-docker](/open-testnet-2/relayer-docker/).
+- For BTC signer node setup, navigate to [relayer-docker](/open-testnet-2/relayer-docker/).
 
 3. Follow the detailed instructions provided to build and run the dockers containers.
 
 For detailed setup and configuration, please refer to the respective README files:
 
 - Validator Docker [Instructions](/open-testnet-2/validator-docker/readme.md)
-- BTC Signer Docker [Instructions](/open-testnet-2/relayer-docker/readme.md)
+- Relayer Docker [Instructions](/open-testnet-2/relayer-docker/readme.md)
