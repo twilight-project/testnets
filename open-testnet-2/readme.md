@@ -12,7 +12,7 @@ This directory contains two separate docker files organized to setup and deploy 
 - **Components:** Includes the setup environment and instructions for deploying a standard NYKS validator node along with ZKOS and Faucet.
 - **Additional Information:** Instructions to set up a new testnet are also provided here.
 
-### [Relayer-docker](/open-testnet-2/relayer-docker/)
+### [Relayer Docker](/open-testnet-2/relayer-docker/)
 - **Purpose:** Set up a relayer node and all the required services.
 - **Components:** includes the setup environment and detailed instructions for setting up a standard Relayer node.
 
