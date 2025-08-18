@@ -72,22 +72,11 @@ The name of the `nyks` release executable file varies depending on the processor
 ### Configurations
 
 #### nyks
-Currently, the docker container is configured to build a standalone node and creates a new chain. If you wish to join an existing chain, modifications to the [Dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile) will be necessary. 
-##### Instructions for joining existing network
-Make the following changes in the docker script to join an existing network. 
-1. Comment out the section for `single node setup`
-2. Uncomment the section for `joining existing chain`
-3. Provide the `genesis.json` and `persistent_peers.txt` for the existing chain [here](/open-testnet-2/required-files/).
+Currently, the docker container is configured to build a standalone node and creates a new chain. if you want to make any configuration changes to nyks chain. you will have to open the docker container in interactive mode and make changes the following files accordingly (see the SSH section below).
+1. genesis.json
+2. config.toml
+3. app.toml
 
-4. Upon initialization, the node will enter the Initial Block Download (IBD) phase. This indicates that your node has joined the chain and is currently synchronizing. During this period, `btc-oracle` program cannot be run until the chain has synchronized completely. 
-
-### btc-oracle
-The `btc-oracle` program can be configured to work in `Validator` and or `Judge` mode.
-The validator mode is enabled by default in this deployment. 
-Uncomment the following line in the [dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile) to enable the validator to act as a `Judge` as well. 
-```
-#RUN sed -i '23s|.*| "running_mode": judge,|' config.json
-```
 ## Storage
 The Docker container uses the following directories for persistent storage. Delete the following folders to completely remove all chain data, 
 1. /nyks/data/
@@ -114,11 +103,6 @@ This will give us the current BTC chaitips from forkscanner. It will only work i
 2. ```curl http://localhost:26657/status ```
 This will retrieve the current status for the nyks node. This contains information such as no. of peers and if the node is catching up.
 
-3. ```docker exec -it <psql container id> psql -U forkscanner -d forkscanner ```
-    ```docker exec -it <psql container id> psql -U forkscanner -d judge ```
-
-These commands will open psql for the database Forkscanner (used by Forkscanner) and Judge (used by Btc-Oracle) respectively. Afterwards you can query the chaintips table. 
-    ```select * from chaintips;```
 
 ## Join the network
 You can use the following create-validator command to become a validator:
@@ -126,9 +110,6 @@ You can use the following create-validator command to become a validator:
 ```bash
 nyksd tx staking create-validator --amount=100000000nyks --pubkey=[your-pub-key] --moniker="validator-self" --chain-id=nyks --commission-rate="0.10" --commission-max-rate="0.20" --commission-max-change-rate="0.01" --min-self-delegation="1" --gas="auto" --gas-prices="0nyks" --from=validator-self --keyring-backend test
 ```
-
-## Create a new network
-To create a new network please refer to the [nyks/Dockerfile](/open-testnet-2/validator-docker/nyks/Dockerfile). Please uncomment the `new network` section and comment out the `join network` section.
 
 ## Grafana Stats
 To enable Grafana stats, please [SSH](#ssh-connection-to-the-container) into the container. The configurations can be found in the following file
