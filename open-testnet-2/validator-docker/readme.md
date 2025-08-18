@@ -3,7 +3,7 @@
 # Validator Node setup
 
 This repository contains docker files necessary for setting-up and deploying the validator node. It sets up a new testnet which include running NYKS validator node, Running ZKOS and running the faucet.
-Please keep in mind that this testnet relies on faucet for both Nyks and Btc (on NYKs chain) tokens. Hence we dont need to run the BTC oracle and BTC forkscanner for this testnet. So please ignore the any reference to BTC oracle and forkscanner in this document. 
+Please keep in mind that this testnet relies on faucet for both Nyks and Btc (on NYKs chain) tokens. Hence we dont need to run the BTC oracle and BTC forkscanner for this testnet. So please ignore any reference to BTC oracle and forkscanner in this document. 
 
 ## Architecture
 
