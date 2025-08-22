@@ -6,7 +6,7 @@ RUN USER=root apt-get update && \
     apt-get -y install software-properties-common && \
     apt-get update
 
-RUN git clone https://github.com/twilight-project/relayer-kafka-sink.git
+RUN git clone -b v0.1.0 https://github.com/twilight-project/relayer-kafka-sink.git
 
 WORKDIR /relayer-kafka-sink
 

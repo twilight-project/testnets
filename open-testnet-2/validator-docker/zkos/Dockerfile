@@ -10,9 +10,8 @@ RUN USER=root apt-get update && \
 
 RUN ls -a
 RUN ls -a
-RUN git clone -b refactor/txapi-with-nyks-wallet https://github.com/twilight-project/zkos-rust.git
+RUN git clone -b v0.1.0 https://github.com/twilight-project/zkos-rust.git
 WORKDIR /zkos-rust
-# RUN sed -i 's|http://0\.0\.0\.0:7000|http://nyks:7000|g' transactionapi/src/rpcserver/service.rs
 RUN cargo build --release 
 
 #############################

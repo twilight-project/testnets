@@ -9,7 +9,7 @@ RUN USER=root apt-get update && \
     apt-get update
 RUN ls -a
 RUN ls -a
-RUN git clone -b develop-add-nyks-wallet https://github.com/twilight-project/twilight-relayer.git
+RUN git clone -b v0.1.0 https://github.com/twilight-project/twilight-relayer.git
 WORKDIR /twilight-relayer
 
 RUN cargo build --release 
@@ -32,12 +32,12 @@ RUN cd nyks-wallet && cargo build --release
 FROM debian:bookworm-slim AS runtime
 
 # Install CA certificates so HTTPS works
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates protobuf-compiler jq && \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates protobuf-compiler jq libpq5 libpq-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Create an unprivileged user to run the binary
 RUN useradd -m relayer
-    
+
 # Set work directory to user home; this is where the JSON will be written
 WORKDIR /home/relayer
 # WORKDIR /app
