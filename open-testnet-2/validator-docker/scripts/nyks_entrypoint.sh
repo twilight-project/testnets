@@ -24,6 +24,11 @@ sleep 3
     echo "bootstrap.sh already completed. Skipping..."
 fi
 
+cd /testnet/twilight-self-backend/
+pm2 start npm --name twilight-self-backend -- run start
+
+cd /testnet
 
 echo "Starting btcDepositConfirmer"
 exec depositconfirmer
+

@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -10,6 +11,14 @@ import (
 	"strings"
 
 	"github.com/rs/cors"
+)
+
+const (
+	dbHost     = "zkpass_database" // Docker service name
+	dbPort     = 5434              // Internal port
+	dbUser     = "zkpass"
+	dbPassword = "zkpass"
+	dbName     = "zkpass"
 )
 
 type RequestPayload struct {
@@ -51,13 +60,13 @@ func runBTCDepositConfirmation(recipientAddress string) error {
 		tx_id,
 		recipientAddress,
 		validatorAddr,
-		"--from",             "validator-self",
-                "--chain-id",         "nyks",
-                "--keyring-backend",  "test",
-                "--yes",
+		"--from", "validator-self",
+		"--chain-id", "nyks",
+		"--keyring-backend", "test",
+		"--yes",
 	)
-	 // 2. Force the right HOME so nyksd sees your test keyring
-        // cmd.Env = append(os.Environ(),"HOME=${HOME}",)
+	// 2. Force the right HOME so nyksd sees your test keyring
+	// cmd.Env = append(os.Environ(),"HOME=${HOME}",)
 
 	// Run the command and capture output
 	output, err := cmd.CombinedOutput()
@@ -68,6 +77,7 @@ func runBTCDepositConfirmation(recipientAddress string) error {
 	fmt.Printf("Command executed successfully:\n%s\n", string(output))
 	return nil
 }
+
 // runBTCDepositConfirmation runs the specified command with the provided parameters.
 func runBTCDepositConfirmationRelayerWallet(recipientAddress string) error {
 	addrBytes, err := exec.Command(
@@ -88,13 +98,13 @@ func runBTCDepositConfirmationRelayerWallet(recipientAddress string) error {
 		tx_id,
 		recipientAddress,
 		validatorAddr,
-		"--from",             "validator-self",
-                "--chain-id",         "nyks",
-                "--keyring-backend",  "test",
-                "--yes",
+		"--from", "validator-self",
+		"--chain-id", "nyks",
+		"--keyring-backend", "test",
+		"--yes",
 	)
-	 // 2. Force the right HOME so nyksd sees your test keyring
-        // cmd.Env = append(os.Environ(),"HOME=${HOME}",)
+	// 2. Force the right HOME so nyksd sees your test keyring
+	// cmd.Env = append(os.Environ(),"HOME=${HOME}",)
 
 	// Run the command and capture output
 	output, err := cmd.CombinedOutput()
@@ -110,15 +120,15 @@ func runBankSendCommand(toAddress string) error {
 	// Construct the command
 	cmd := exec.Command(
 		"nyksd", "tx", "bank", "send",
-                "faucet",		
-                toAddress,
+		"faucet",
+		toAddress,
 		"100000nyks",
-               "--keyring-backend", "test",
-               "--chain-id",        "nyks",
-               "--yes", 
+		"--keyring-backend", "test",
+		"--chain-id", "nyks",
+		"--yes",
 	)
 	// 2. Force the right HOME so nyksd sees your test keyring
-    	// cmd.Env = append(os.Environ(),"HOME=${HOME}",)
+	// cmd.Env = append(os.Environ(),"HOME=${HOME}",)
 	// Run the command and capture output
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -212,24 +222,95 @@ func handlefaucet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Command executed successfully"))
 }
 
-func main() {
-	 mux := http.NewServeMux()
-         mux.HandleFunc("/mint", handlemint)
-	 mux.HandleFunc("/faucet", handlefaucet)
-	 mux.HandleFunc("/mint-relayer-wallet", handlemintRelayerWallet)
-	// Configure
-    c := cors.New(cors.Options{
-        AllowedOrigins:   []string{"*"},
-        AllowedMethods:   []string{"POST", "OPTIONS"},
-        AllowedHeaders:   []string{"Content-Type"},
-        AllowCredentials: true,
-    })
+func connectToDatabase() (*sql.DB, error) {
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
 
-        handler := c.Handler(mux)
+	db, err := sql.Open("postgres", connectionString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database connection: %w", err)
+	}
+
+	// Test the connection
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	return db, nil
+}
+
+func checkAddressExists(address string) (bool, error) {
+	db, err := connectToDatabase()
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+
+	var exists bool
+	query := "SELECT EXISTS(SELECT 1 FROM public.zkpass WHERE address = $1)"
+
+	err = db.QueryRow(query, address).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("failed to check address existence: %w", err)
+	}
+
+	return exists, nil
+}
+
+func handleWhiteCheck(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var payload RequestPayload
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+		return
+	}
+
+	if payload.RecipientAddress == "" {
+		http.Error(w, "recipientAddress is required", http.StatusBadRequest)
+		return
+	}
+
+	// Check if address exists in whitelist
+	exists, err := checkAddressExists(payload.RecipientAddress)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Database error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"exists":  exists,
+		"address": payload.RecipientAddress,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/mint", handlemint)
+	mux.HandleFunc("/faucet", handlefaucet)
+	mux.HandleFunc("/mint-relayer-wallet", handlemintRelayerWallet)
+	mux.HandleFunc("/check", handleWhiteCheck)
+	// Configure
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(mux)
 	fmt.Println("Server is running on port 6969  with CORS...")
 	err := http.ListenAndServe(":6969", handler)
 	if err != nil {
 		fmt.Printf("Error starting server: %v\n", err)
 	}
-//log.Fatal(http.ListenAndServe(":6969", handler))
+	// log.Fatal(http.ListenAndServe(":6969", handler))
 }
