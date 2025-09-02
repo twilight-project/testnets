@@ -97,7 +97,6 @@ RUN sudo apt update
 RUN sudo apt install -y nodejs npm
 RUN npm install -g pm2
 RUN npm install
-RUN npm run dev
 
 # ========================================================================================
 
