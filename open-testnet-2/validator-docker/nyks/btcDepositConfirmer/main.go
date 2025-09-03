@@ -1,29 +1,42 @@
 package main
 
 import (
-	"crypto/rand"
-	"database/sql"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"os/exec"
-	"strings"
+        "crypto/rand"
+        "database/sql"
+        "encoding/hex"
+        "encoding/json"
+        "fmt"
+        "net/http"
+        "os/exec"
+        "strings"
 
-	"github.com/rs/cors"
+        "github.com/rs/cors"
+        _ "github.com/jackc/pgx/v5/stdlib" // postgres driver
 )
 
 const (
-	dbHost     = "zkpass_database" // Docker service name
-	dbPort     = 5434              // Internal port
-	dbUser     = "zkpass"
-	dbPassword = "zkpass"
-	dbName     = "zkpass"
+        dbHost     = "localhost" // Docker service name
+        dbPort     = 5436              // Internal port
+        dbUser     = "zkpass"
+        dbPassword = "zkpass"
+        dbName     = "zkpass"
 )
 
 type RequestPayload struct {
-	RecipientAddress string `json:"recipientAddress"`
+        RecipientAddress string `json:"recipientAddress"`
 }
+type APIError struct {
+        Code    string `json:"code"`
+        Details string `json:"details,omitempty"`
+}
+
+type APIResponse struct {
+        Status  string      `json:"status"`            // "success" | "error"
+        Data    interface{} `json:"data,omitempty"`    // present on success
+        Error   *APIError   `json:"error,omitempty"`   // present on error
+        Message string      `json:"message,omitempty"` // optional human message
+}
+
 
 func generateRandomHash() (string, error) {
 	// Create a 32-byte array
@@ -257,39 +270,64 @@ func checkAddressExists(address string) (bool, error) {
 	return exists, nil
 }
 
+func writeJSON(w http.ResponseWriter, status int, payload APIResponse) {
+        w.Header().Set("Content-Type", "application/json")
+        // Optional hardening:
+        // w.Header().Set("Cache-Control", "no-store")
+        w.WriteHeader(status)
+
+        enc := json.NewEncoder(w)
+        enc.SetEscapeHTML(false)
+        _ = enc.Encode(payload)
+}
+
+func writeError(w http.ResponseWriter, status int, code, details, message string) {
+        writeJSON(w, status, APIResponse{
+                Status:  "error",
+                Error:   &APIError{Code: code, Details: details},
+                Message: message,
+        })
+}
+
+
 func handleWhiteCheck(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
+	 if r.Method != http.MethodPost {
+                writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "use POST", "Invalid request method")
+                return
+        }
 
-	var payload RequestPayload
-	err := json.NewDecoder(r.Body).Decode(&payload)
-	if err != nil {
-		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
-		return
-	}
+        var payload RequestPayload
+        err := json.NewDecoder(r.Body).Decode(&payload)
+        if err != nil {
+                writeError(w, http.StatusBadRequest, "invalid_json", err.Error(), "Invalid JSON payload")
+                return
+        }
+        
+        addr := strings.TrimSpace(payload.RecipientAddress)
+        if addr == "" {
+                writeError(w, http.StatusBadRequest, "missing_field", "recipientAddress empty", "recipientAddress is required")
+                return
+        }
 
-	if payload.RecipientAddress == "" {
-		http.Error(w, "recipientAddress is required", http.StatusBadRequest)
-		return
-	}
+        // Check if address exists in whitelist
+        exists, err := checkAddressExists(addr)
+        if err != nil {
+                writeError(w, http.StatusInternalServerError, "db_error", err.Error(), "Database error")
+                return
+        }
+        msg := "Address is not whitelisted"
+        if exists {
+                msg = "Address is whitelisted"
+        }
+        writeJSON(w, http.StatusOK, APIResponse{
+                Status: "success",
+                Data: map[string]interface{}{
+                        "address":     addr,
+                        "whitelisted": exists,
+                },
+                Message: msg,
+        })
 
-	// Check if address exists in whitelist
-	exists, err := checkAddressExists(payload.RecipientAddress)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Database error: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	response := map[string]interface{}{
-		"exists":  exists,
-		"address": payload.RecipientAddress,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
 }
 
 func main() {
@@ -297,7 +335,7 @@ func main() {
 	mux.HandleFunc("/mint", handlemint)
 	mux.HandleFunc("/faucet", handlefaucet)
 	mux.HandleFunc("/mint-relayer-wallet", handlemintRelayerWallet)
-	mux.HandleFunc("/check", handleWhiteCheck)
+	mux.HandleFunc("/whitelist/status", handleWhiteCheck)
 	// Configure
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
