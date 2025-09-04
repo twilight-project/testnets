@@ -35,23 +35,6 @@ services:
       - network_conn
     restart: always
 
-  zkpass_database:
-    container_name: "zkpass_database"
-    image: postgres:10
-    restart: unless-stopped
-    ports:
-        - "5434:5432"
-    volumes:
-        - ./psql/zkpass.sql:/docker-entrypoint-initdb.d/zkpass.sql
-        - ./psql/data:/var/lib/postgresql/data
-    environment:
-        LC_ALL: C.UTF-8
-        POSTGRES_USER: zkpass
-        POSTGRES_PASSWORD: zkpass
-        POSTGRES_DB: zkpass
-    networks:
-        - network_conn
-
 
   zkos_database:
     image: docker.io/bitnami/postgresql:17.5.0
@@ -100,6 +83,44 @@ services:
     networks:
       - network_conn
 
+
+  zkpass_database:
+    image: docker.io/bitnami/postgresql:latest
+    environment:
+      - POSTGRESQL_USERNAME=zkpass
+      - POSTGRESQL_PASSWORD=zkpass
+      - POSTGRESQL_DATABASE=zkpass
+    ports:
+      - "5436:5432"
+    volumes:
+      - zkpass-data:/bitnami/postgresql
+      - ./zkpass/zkpass.sql:/docker-entrypoint-initdb.d/zkpass.sql:ro
+    container_name: zkpass_database
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U zkpass -d zkpass" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - network_conn
+
+  zkpass:
+    build:
+      context: ./zkpass
+      dockerfile: Dockerfile
+    hostname: zkpass
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      zkpass_database:
+        condition: service_healthy
+    networks:
+      - network_conn
+    container_name: zkpass
+
 networks:
   network_conn:
 
@@ -108,4 +129,6 @@ volumes:
   zkos_database-data:
     driver: local
   nyks-secrets:
+    driver: local
+  zkpass-data:
     driver: local

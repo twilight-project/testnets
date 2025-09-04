@@ -12,7 +12,7 @@ RUN ls -a
 RUN ls -a
 RUN git clone -b v0.1.0 https://github.com/twilight-project/zkos-rust.git
 WORKDIR /zkos-rust
-RUN cargo build --release 
+RUN cargo build --release
 
 #############################
 # Runtime stage
