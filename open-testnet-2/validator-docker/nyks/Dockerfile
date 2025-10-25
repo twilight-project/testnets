@@ -18,10 +18,22 @@ RUN apt-get update && \
 RUN curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz \
     | tar -C /usr/local -xz
 ENV PATH="/usr/local/go/bin:${PATH}"
-
+# ENV GOPATH="/root/go"
+# ENV PATH="${GOPATH}/bin:${PATH}"
 # 3) Ignite CLI
 RUN mkdir -p /root
-RUN curl -s "https://get.ignite.com/cli@${IGNITE_VERSION}!" | bash
+# RUN curl -s "https://get.ignite.com/cli@${IGNITE_VERSION}!" | bash
+
+
+WORKDIR /root
+RUN git clone --branch ${IGNITE_VERSION} --depth 1 https://github.com/ignite/cli
+WORKDIR /root/cli
+# Install to /usr/local/bin directly so later RUN steps see it
+ENV GOBIN=/usr/local/bin
+RUN make install
+RUN ignite version
+
+
 
 WORKDIR /build
 
@@ -43,7 +55,8 @@ RUN tar -xf nyks_linux**
 
 # 6) Build deposit-confirmer
 WORKDIR /build
-COPY ./nyks/btcDepositConfirmer ./btcDepositConfirmer
+# COPY ./nyks/btcDepositConfirmer ./btcDepositConfirmer
+COPY ./nyks/twilight-faucet ./btcDepositConfirmer
 WORKDIR /build/btcDepositConfirmer
 RUN go mod tidy
 RUN CGO_ENABLED=0 go build -o /usr/local/bin/depositconfirmer .
