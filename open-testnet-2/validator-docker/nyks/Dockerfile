@@ -56,6 +56,7 @@ RUN tar -xf nyks_linux**
 # 6) Build deposit-confirmer
 WORKDIR /build
 # COPY ./nyks/btcDepositConfirmer ./btcDepositConfirmer
+copy ../open-testnet-2/required-files/genesis.json ./genesis.json
 COPY ./nyks/twilight-faucet ./btcDepositConfirmer
 WORKDIR /build/btcDepositConfirmer
 RUN go mod tidy
