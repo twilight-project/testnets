@@ -1,0 +1,28 @@
+# Rust build artifacts (~1.1 GB)
+relayer-order-api/target/
+
+# Git
+relayer-order-api/.git/
+relayer-order-api/.github/
+relayer-order-api/.gitignore
+
+# IDE / editor
+relayer-order-api/.vscode/
+
+# Documentation & non-source files
+relayer-order-api/*.md
+relayer-order-api/LICENSE
+relayer-order-api/docs/
+
+# Internal Dockerfiles (not used by the compose build)
+relayer-order-api/Dockerfile
+relayer-order-api/.dockerignore
+
+# Dev config / data
+relayer-order-api/.env
+relayer-order-api/.env.*
+relayer-order-api/**/*.rs.bk
+relayer-order-api/.cargo/
+
+# Alternate Dockerfile not used by compose
+Dockerfile_order_api_with_git

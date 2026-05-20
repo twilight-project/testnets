@@ -15,8 +15,8 @@ import (
 )
 
 const (
-        dbHost     = "localhost" // Docker service name
-        dbPort     = 5436              // Internal port
+        dbHost     = "zkpass_database" // Docker service name
+        dbPort     = 5432              // Internal port
         dbUser     = "zkpass"
         dbPassword = "zkpass"
         dbName     = "zkpass"
@@ -239,7 +239,7 @@ func connectToDatabase() (*sql.DB, error) {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPassword, dbName)
 
-	db, err := sql.Open("postgres", connectionString)
+	db, err := sql.Open("pgx", connectionString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database connection: %w", err)
 	}

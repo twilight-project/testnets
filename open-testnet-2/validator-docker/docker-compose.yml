@@ -12,14 +12,16 @@ services:
       - "26657:26657"
       - "26660:26660"
       - "6969:6969"
+      - "9090:9090"
     expose:
       - "1317"
       - "26656"
       - "26657"
       - "26660"
       - "6969"
+      - "9090"
     volumes:
-      - ./nyks/data:/root/.nyks
+      - ./data/.nyks/:/root/.nyks
       - nyks-secrets:/root/secrets/
     command: [ "./nyks_entrypoint.sh" ]
     healthcheck:
@@ -34,7 +36,6 @@ services:
     networks:
       - network_conn
     restart: always
-
 
   zkos_database:
     image: docker.io/bitnami/postgresql:17.5.0
@@ -76,13 +77,12 @@ services:
       - "3030:3030"
       - "2500:2500"
     volumes:
-      - ./zkos/data/:/home/zkos/
+      - ./data/zkos/:/home/zkos/
       - ./zkos/zkos.env:/home/zkos/.env
       - nyks-secrets:/home/zkos/secrets/
     container_name: zkos
     networks:
       - network_conn
-
 
   zkpass_database:
     image: docker.io/bitnami/postgresql:latest
@@ -112,6 +112,8 @@ services:
       dockerfile: Dockerfile
     hostname: zkpass
     restart: always
+    volumes:
+      - ./zkpass/.env.twilight-self-backend:/usr/src/app/twilight-self-backend/.env
     ports:
       - "3001:3001"
     depends_on:
@@ -121,52 +123,50 @@ services:
       - network_conn
     container_name: zkpass
 
-  indexer-db:
-    image: docker.io/bitnami/postgresql:latest
-    environment:
-      - POSTGRESQL_USERNAME=indexer
-      - POSTGRESQL_PASSWORD=indexer
-      - POSTGRESQL_DATABASE=indexer
-    ports:
-      - "5437:5432"
-    volumes:
-      - indexer-data:/bitnami/postgresql
-      # - ./indexer/indexer.sql:/docker-entrypoint-initdb.d/indexer.sql:ro
-    container_name: indexer-db
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U indexer -d indexer" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - network_conn 
+  # indexer-db:
+  #   image: docker.io/bitnami/postgresql:latest
+  #   environment:
+  #     - POSTGRESQL_USERNAME=indexer
+  #     - POSTGRESQL_PASSWORD=indexer
+  #     - POSTGRESQL_DATABASE=indexer
+  #   ports:
+  #     - "5437:5432"
+  #   volumes:
+  #     - indexer-data:/bitnami/postgresql
+  #     # - ./indexer/indexer.sql:/docker-entrypoint-initdb.d/indexer.sql:ro
+  #   container_name: indexer-db
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: [ "CMD-SHELL", "pg_isready -U indexer -d indexer" ]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 10s
+  #   networks:
+  #     - network_conn 
 
-  twilight-indexer:
-    build:
-      context: ./twilight-indexer
-      dockerfile: Dockerfile
-    hostname: twilight-indexer
-    restart: always
-    ports:
-      - "3002:3002"
-    networks:
-      - network_conn
-    container_name: twilight-indexer
-    depends_on:
-      indexer-db:
-        condition: service_healthy
-    volumes:
-      # - ./twilight-indexer/data:/home/indexer/data
-      - ./twilight-indexer/.env:/home/indexer/.env
-      - ./twilight-indexer/height.txt:/home/indexer/height.txt
-    environment:
-      - DATABASE_URL=postgres://indexer:indexer@indexer-db:5432/indexer
+  # twilight-indexer:
+  #   build:
+  #     context: ./twilight-indexer
+  #     dockerfile: Dockerfile
+  #   hostname: twilight-indexer
+  #   restart: always
+  #   ports:
+  #     - "3002:3002"
+  #   networks:
+  #     - network_conn
+  #   container_name: twilight-indexer
+  #   depends_on:
+  #     indexer-db:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./twilight-indexer/.env:/home/indexer/.env
+  #     - ./twilight-indexer/height.txt:/home/indexer/height.txt
+  #   environment:
+  #     - DATABASE_URL=postgres://indexer:indexer@indexer-db:5432/indexer
 
 networks:
   network_conn:
-
 
 volumes:
   zkos_database-data:

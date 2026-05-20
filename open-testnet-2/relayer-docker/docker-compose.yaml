@@ -81,7 +81,7 @@ services:
       context: ./services/relayer-core
       dockerfile: Dockerfile_relayer_core
     hostname: relayer-core
-    restart: always
+    restart: on-failure:5
     ports:
       - "3033:3031"
     depends_on:
@@ -95,6 +95,7 @@ services:
       - ./data/relayer-core/relayer_snapshot:/root/relayer_snapshot
       - ./data/relayer-core/state:/home/relayer/state
       - ./data/relayer-core/logs:/home/relayer/logs
+      - ./data/relayer-core/event_queue:/root/relayer_snapshot/event_queue
       - ./envs/relayer-core.env:/home/relayer/.env:rw
     container_name: relayer-core
 
@@ -167,7 +168,7 @@ services:
         BINARY: "archiver"
         DOCKER_BUILDKIT: 0
     hostname: archiver
-    restart: always
+    restart: on-failure:5
     depends_on:
       data-api-database:
         condition: service_healthy
@@ -193,7 +194,9 @@ services:
         BINARY: "auth"
         DOCKER_BUILDKIT: 0
     hostname: auth
-    restart: always
+    restart: on-failure:5
+    ports:
+      - 5000:5000
     depends_on:
       data-api-database:
         condition: service_healthy
@@ -206,6 +209,8 @@ services:
     volumes:
       - ./data/data-api-auth/:/var/log/relayer-auth
       - ./envs/data-api.env:/app/.env
+    env_file:
+      - ./envs/data-api.env
     healthcheck:
       test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
       interval: 15s
@@ -221,7 +226,7 @@ services:
         BINARY: "api"
         DOCKER_BUILDKIT: 0
     hostname: api
-    restart: always
+    restart: on-failure:5
     depends_on:
       auth:
         condition: service_started

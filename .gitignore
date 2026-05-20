@@ -31,3 +31,4 @@ open-testnet-2/validator-docker/nyks/data
 open-testnet-2/validator-docker/zkos/data
 open-testnet-2/relayer-docker/data
 open-testnet-2/validator-docker/zkos/validator-self.mnemonic
+open-testnet-2/validator-docker/data/

@@ -1,0 +1,29 @@
+# Rust build artifacts (~3.4 GB)
+relayer-data-api/target/
+
+# Git
+relayer-data-api/.git/
+relayer-data-api/.github/
+relayer-data-api/.gitignore
+
+# IDE / editor
+relayer-data-api/.vscode/
+
+# Documentation & non-source files
+relayer-data-api/*.md
+relayer-data-api/LICENSE
+relayer-data-api/docs/
+relayer-data-api/postman/
+
+# Internal Dockerfiles (not used by the compose build)
+relayer-data-api/Dockerfile
+relayer-data-api/.dockerignore
+
+# Dev config / data
+relayer-data-api/.env
+relayer-data-api/.env.*
+relayer-data-api/**/*.rs.bk
+relayer-data-api/.cargo/
+
+# Alternate Dockerfile not used by compose
+Dockerfile_data_api_with_git

@@ -1,0 +1,48 @@
+# Runtime volume data (kafka, zookeeper, redis, relayer state/logs)
+data/
+
+# Rust build artifacts (6+ GB across all services)
+**/target/
+
+# Git
+**/.git/
+**/.github/
+**/.gitignore
+
+# IDE / editor
+.vscode/
+**/.vscode/
+**/.idea/
+**/*.swp
+**/*.swo
+**/*~
+
+# Environment files (mounted at runtime, not baked into images)
+# envs/
+
+# Documentation
+**/*.md
+**/LICENSE
+**/docs/
+
+# Docker files not needed inside build context
+docker-compose.yaml
+.dockerignore
+**/.dockerignore
+**/Dockerfile
+**/Dockerfile_*_with_git
+
+# Rust-specific
+**/*.rs.bk
+**/.cargo/
+
+# Example / dev config
+# **/.env
+# **/.env.*
+**/postman/
+**/postman-requests/
+
+# Misc
+snapshot-version-*
+**/Kafka-cluster/
+**/nginx/

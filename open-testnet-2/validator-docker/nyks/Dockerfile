@@ -55,8 +55,8 @@ RUN tar -xf nyks_linux**
 
 # 6) Build deposit-confirmer
 WORKDIR /build
-# COPY ./nyks/btcDepositConfirmer ./btcDepositConfirmer
-COPY ./nyks/twilight-faucet ./btcDepositConfirmer
+COPY ./nyks/btcDepositConfirmer ./btcDepositConfirmer
+# COPY ./nyks/twilight-faucet ./btcDepositConfirmer
 WORKDIR /build/btcDepositConfirmer
 RUN go mod tidy
 RUN CGO_ENABLED=0 go build -o /usr/local/bin/depositconfirmer .
@@ -90,6 +90,6 @@ RUN chmod +x /usr/local/bin/nyks_entrypoint.sh \
 WORKDIR /root
 VOLUME ["/root/.nyks"]
 
-EXPOSE 1317 26656 26657 26660 6969
+EXPOSE 1317 26656 26657 26660 6969 9090
 
 ENTRYPOINT ["nyks_entrypoint.sh"]

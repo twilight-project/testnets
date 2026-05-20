@@ -1,0 +1,35 @@
+# Rust build artifacts (~2.1 GB)
+twilight-relayer/target/
+
+# Git
+twilight-relayer/.git/
+twilight-relayer/.github/
+twilight-relayer/.gitignore
+
+# IDE / editor
+twilight-relayer/.vscode/
+
+# Documentation & non-source files
+twilight-relayer/*.md
+twilight-relayer/LICENSE
+twilight-relayer/docs/
+twilight-relayer/postman-requests/
+
+# Internal Dockerfiles (not used by the compose build)
+twilight-relayer/Dockerfile
+twilight-relayer/docker-compose.yaml
+twilight-relayer/.dockerignore
+
+# Dev config / data
+twilight-relayer/.env
+twilight-relayer/.env.*
+twilight-relayer/Kafka-cluster/
+twilight-relayer/nginx/
+twilight-relayer/data/
+twilight-relayer/logs/
+twilight-relayer/snapshot-version*
+twilight-relayer/**/*.rs.bk
+twilight-relayer/.cargo/
+
+# Alternate Dockerfile not used by compose
+Dockerfile_relayer_core_with_git
