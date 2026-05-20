@@ -1,26 +1,59 @@
-FROM rust:1.87.0 as builder
+# syntax=docker/dockerfile:1
+#############################
+# Build stage for data-api
+#############################
+FROM rust:1.88.0 as builder
+
 RUN USER=root apt-get update && \
     apt-get -y upgrade && \
     apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
-    apt-get -y install software-properties-common protobuf-compiler && \
-    apt-get update 
+    apt-get -y install protobuf-compiler && \
+    apt-get update
 
-RUN git clone -b v0.1.0 https://github.com/twilight-project/relayer-data-api.git
 WORKDIR /relayer-data-api
-RUN cargo build --release --bins    
 
-FROM rust
-RUN apt-get update && apt-get install -y ca-certificates curl libpq-dev libssl-dev postgresql-client redis-tools netcat-openbsd procps
+# Copy only manifests first to cache dependency resolution & build
+COPY ./relayer-data-api/Cargo.toml ./relayer-data-api/Cargo.lock ./
+RUN mkdir -p src/bin && \
+    echo 'fn main() {}' > src/bin/archiver.rs && \
+    echo 'fn main() {}' > src/bin/api.rs && \
+    echo 'fn main() {}' > src/bin/auth.rs && \
+    touch src/lib.rs
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    cargo build --release --bins 2>/dev/null || true
+RUN rm -rf src
+
+# Copy actual source (only this layer invalidates on code changes)
+COPY ./relayer-data-api/ ./
+
+ARG BINARY
+
+# Incremental build — target dir is cached across rebuilds
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/relayer-data-api/target \
+    cargo build --release --bins && \
+    cp target/release/${BINARY} /tmp/data-api-main && \
+    cp target/release/${BINARY}.d /tmp/data-api-main.d
+
+#############################
+# Runtime stage
+#############################
+FROM debian:bookworm-slim AS runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl libpq-dev libssl-dev postgresql-client redis-tools netcat-openbsd procps && \
+    rm -rf /var/lib/apt/lists/*
+
 EXPOSE 5000
 EXPOSE 8989
 EXPOSE 8990
 EXPOSE 8987
 
 WORKDIR /app
-
-ARG BINARY
-COPY --from=builder ./relayer-data-api/target/release/${BINARY} ./main
-COPY --from=builder ./relayer-data-api/target/release/${BINARY}.d ./main.d
+COPY --from=builder /tmp/data-api-main ./main
+COPY --from=builder /tmp/data-api-main.d ./main.d
 COPY ./healthcheck.sh /usr/local/bin/healthcheck.sh
 RUN chmod +x /usr/local/bin/healthcheck.sh
 ENTRYPOINT ["/app/main"]

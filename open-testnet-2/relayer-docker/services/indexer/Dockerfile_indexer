@@ -1,0 +1,23 @@
+FROM rust as builder 
+
+RUN USER=root apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
+    apt-get -y install protobuf-compiler && \
+    apt-get update 
+RUN ls -a
+RUN git clone -b data-api-fix https://github.com/AhmadAshraf2/twilight-indexer.git
+
+WORKDIR /twilight-indexer
+
+RUN cargo build --release
+
+
+FROM rust
+RUN apt-get update && apt-get install -y ca-certificates curl libpq-dev libssl-dev postgresql-client redis-tools netcat-openbsd procps
+
+WORKDIR /app
+COPY --from=builder ./twilight-indexer/target/release/twilight_indexer ./
+COPY --from=builder ./twilight-indexer/target/release/twilight_indexer.d ./
+EXPOSE 8449
+ENTRYPOINT ["/app/twilight_indexer"]

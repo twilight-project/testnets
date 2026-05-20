@@ -1,0 +1,27 @@
+FROM rust:1.88.0 as builder
+
+RUN USER=root apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
+    apt-get -y install protobuf-compiler && \
+    apt-get update
+
+RUN  apt-get -y  install openssh-server
+RUN  apt-get -y  install openssh-client
+RUN ls
+RUN ls -a
+# RUN git clone -b v0.1.0 https://github.com/twilight-project/relayer-order-api.git
+RUN git clone -b sltp https://github.com/twilight-project/relayer-order-api.git
+
+WORKDIR /relayer-order-api
+
+RUN cargo build --release
+
+FROM rust
+RUN apt-get update && apt-get install -y ca-certificates curl libpq-dev libssl-dev
+EXPOSE 3032
+WORKDIR /app
+COPY --from=builder ./relayer-order-api/target/release/main ./
+COPY --from=builder ./relayer-order-api/target/release/main.d ./
+ENTRYPOINT ["/app/main"]
+

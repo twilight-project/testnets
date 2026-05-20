@@ -1,5 +1,5 @@
 
-FROM node:20-slim 
+FROM node:22-slim 
 
 RUN USER=root apt-get update && \
     apt-get -y upgrade && \
@@ -8,13 +8,17 @@ RUN USER=root apt-get update && \
 # Create app directory
 WORKDIR /usr/src/app
 RUN ls -la
-RUN git clone -b do_server https://github.com/usmanshahid86/twilight-self-backend.git
+RUN ls -la
+RUN ls -la
+# RUN git clone -b mock-docs https://github.com/usmanshahid86/twilight-self-backend.git
+COPY ./twilight-self-backend ./twilight-self-backend
 WORKDIR /usr/src/app/twilight-self-backend
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
-COPY package*.json ./
+# COPY package*.json ./
 
 # Install production dependencies. If you need dev dependencies, remove --omit=dev
+RUN npm install
 RUN npm ci --omit=dev && npm cache clean --force;
 
 COPY .env.twilight-self-backend .env

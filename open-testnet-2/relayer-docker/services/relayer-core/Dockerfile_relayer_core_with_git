@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 #############################
 # Build stage for relayer-core
 #############################
@@ -8,36 +7,23 @@ RUN USER=root apt-get update && \
     apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
     apt-get -y install protobuf-compiler && \
     apt-get update
-
+RUN ls -a && pwd
+RUN ls -a && pwd
+RUN ls -a && pwd
+RUN ls -a && pwd
+RUN git clone -b risk-param-fix-halt https://github.com/twilight-project/twilight-relayer.git
 WORKDIR /twilight-relayer
 
-# Copy only manifests first to cache dependency resolution & build
-COPY ./twilight-relayer/Cargo.toml ./twilight-relayer/Cargo.lock ./
-RUN mkdir src && echo 'fn main() {}' > src/main.rs && touch src/lib.rs
-# RUN cargo update
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    cargo build --release 2>/dev/null || true
-RUN rm -rf src
-
-# Copy actual source (only this layer invalidates on code changes)
-COPY ./twilight-relayer/ ./
-
-# Incremental build — target dir is cached across rebuilds
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    --mount=type=cache,target=/twilight-relayer/target \
-    cargo build --release && \
-    cp target/release/main /tmp/relayer-main && \
-    cp target/release/main.d /tmp/relayer-main.d
+RUN cargo build --release
 
 #############################
 # Build stage for nyks-wallet
 #############################
-FROM rust:1.88.0 as builder-nyks-wallet
+FROM rust:1.87.0 as builder-nyks-wallet
 RUN USER=root apt-get update && \
     apt-get -y upgrade && \
-    apt-get -y install git curl g++ build-essential libssl-dev pkg-config protobuf-compiler && \
+    apt-get -y install git curl g++ build-essential libssl-dev pkg-config && \
+    apt-get -y install software-properties-common protobuf-compiler && \
     apt-get update
 # RUN git clone -b v0.0.4-relayer-deployer https://github.com/twilight-project/nyks-wallet.git
 RUN git clone -b v0.1.1 https://github.com/twilight-project/nyks-wallet.git
@@ -59,8 +45,8 @@ RUN useradd -m relayer
 WORKDIR /home/relayer
 # WORKDIR /app
 COPY --from=builder-nyks-wallet ./nyks-wallet/target/release/relayer-init ./relayer-init
-COPY --from=builder-relayer-core /tmp/relayer-main ./main
-COPY --from=builder-relayer-core /tmp/relayer-main.d ./main.d
+COPY --from=builder-relayer-core ./twilight-relayer/target/release/main ./
+COPY --from=builder-relayer-core ./twilight-relayer/target/release/main.d ./
 COPY ./relayerprogram.json ./relayerprogram.json
 COPY ./entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
