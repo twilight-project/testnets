@@ -4,8 +4,8 @@
 # Uses full Ubuntu because we need build-essentials, git, Ignite, etc.
 FROM ubuntu:22.04 AS builder
 
-ARG GO_VERSION=1.22.2
-ARG IGNITE_VERSION=v0.26.1
+ARG GO_VERSION=1.25.6
+ARG IGNITE_VERSION=main
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 1) OS packages (single layer; cleans cache afterwards)
@@ -38,21 +38,24 @@ RUN ignite version
 WORKDIR /build
 
 # 4) Get nyks + its forked Cosmos SDK
-RUN git clone --branch twilightv453 \
-    https://github.com/twilight-project/cosmos-sdk.git
+# RUN git clone --branch twilightv453 \
+#     https://github.com/twilight-project/cosmos-sdk.git
+RUN ls
+RUN git clone --branch main \
+    https://github.com/AhmadAshraf2/nyks-v2.git 
 
-RUN git clone --branch clearingv03 \
-    https://github.com/twilight-project/nyks.git
-
-WORKDIR /build/nyks
+WORKDIR /build/nyks-v2
 # tidy & remove toolchain stanza
 RUN go mod tidy && sed -i '/toolchain/d' go.mod
 
 # 5) Build nyksd (static binary inside release tar)
 RUN USER=root ignite chain build --release
-WORKDIR /build/nyks/release
-RUN tar -xf nyks_linux**
-
+WORKDIR /build/nyks-v2/release
+RUN ls -a
+RUN tar -xf nyks_linux_amd64.tar.gz
+RUN ls -a
+WORKDIR /build/nyks-v2/release/tmp
+RUN ls -a
 # 6) Build deposit-confirmer
 WORKDIR /build
 COPY ./nyks/btcDepositConfirmer ./btcDepositConfirmer
@@ -73,7 +76,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # 1) copy the two statically-linked binaries
-COPY --from=builder /build/nyks/release/nyksd /usr/local/bin/nyksd
+COPY --from=builder /build/nyks-v2/release/tmp/**/nyksd /usr/local/bin/nyksd
 COPY --from=builder /usr/local/bin/depositconfirmer /usr/local/bin/depositconfirmer
 
 # 2) copy entry scripts
